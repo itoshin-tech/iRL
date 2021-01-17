@@ -148,7 +148,7 @@ elif agt_type == 'netQ':
     agt_prm['n_dense2'] = None  # 数値にすると1層追加
 
 else:
-    q ValueError('agt_type が間違っています')
+    ValueError('agt_type が間違っています')
 
 
 # simulation pramter //////////
