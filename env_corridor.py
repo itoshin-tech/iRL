@@ -118,7 +118,7 @@ class Env(core.coreEnv):
             """
 
         else:
-            raise ValueError('task_type の処理ができません')
+            raise ValueError('task_type が間違っています')
 
 
     def reset(self):
@@ -165,7 +165,6 @@ class Env(core.coreEnv):
                 done = True
                 self.agt_state = 'fail'
 
-
         observation = self._make_observation()
 
         # render 用
@@ -199,15 +198,15 @@ class Env(core.coreEnv):
 
         img = np.zeros((height, width, 3), dtype=np.uint8)
 
-        # 背景
+        # 背景の描画
         cv2.rectangle(img, (0, 0), (width-1, height-1), col_brank, -1)
 
-        # ゴール
+        # ゴールの描画
         r0 = (unit * self.goal_pos, 0)
         r1 = (unit * (self.goal_pos + 1), height - 1)
         cv2.rectangle(img, r0, r1, col_goal, -1)
 
-        # エージェント
+        # ロボットの色
         if self.agt_state == 'fail':
             col = col_agt_miss
         elif self.agt_state == 'goal':
@@ -215,6 +214,7 @@ class Env(core.coreEnv):
         else:
             col = col_agt
 
+        # ロボットの描画
         radius = int(unit * 0.35)
         r0 = (int(unit * self.agt_pos + unit/2), int(unit / 2))
         cv2.circle(img, r0, radius, col, -1)

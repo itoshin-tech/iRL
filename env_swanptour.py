@@ -8,6 +8,8 @@ import numpy as np
 import cv2
 import core
 
+PATH_ROBOT = 'rsc/robot.png'
+
 
 class TaskType(Enum):
     """
@@ -45,6 +47,8 @@ class Env(core.coreEnv):
             [0, 1],
             [1, 0],
         ])
+
+    
 
 
     def __init__(  # pylint:disable=too-many-arguments, too-many-locals
@@ -121,6 +125,11 @@ class Env(core.coreEnv):
         self.is_first_step = True  # エピソードの最初のstepのみTrue
         self.agt_state = None  # render 用
         self._truefield = None
+
+        # ロボットの画像
+        self.img_robot = cv2.imread(PATH_ROBOT)
+        self.unit = self.img_robot.shape[0]
+
 
     def set_task_type(self, task_type):
         """
@@ -469,15 +478,10 @@ class Env(core.coreEnv):
         # 色
         col_brank = (0, 255, 0)
         col_wall = (0, 0, 70)
-        col_agt = (255, 255, 255)
-        col_agt_miss = (0, 0, 255)
-        col_agt_rwd = (50, 200, 50)
-        col_agt_edge = (0, 0, 0)
         col_goal = (255, 100, 0)
-        col_agt_obs = (50, 50, 255)
 
         # 画像サイズ
-        unit = int(250.0 / self.field_size)
+        unit = self.unit
         width = unit * self.field_size
         height = unit * self.field_size
         img = np.zeros((height, width, 3), dtype=np.uint8)
@@ -501,18 +505,41 @@ class Env(core.coreEnv):
                     r1 = (r0[0] + unit - 1,  r0[1] + unit - 1)
                     cv2.rectangle(img, r0, r1, col, -1)
 
-        # ロボットの体の描画 -------------------
+        # ロボットの体の描画
+        img = self.draw_robot(img)
+
+        # 観測値の描画
+        img_obs = self.draw_observation(unit, height)
+
+        # 画像の統合
+        mgn_w = 10  # フィールドと観測値の境界線の太さ
+        mgn_col = (200, 200, 0)
+        img_mgn = np.zeros((height, mgn_w, 3), dtype=np.uint8)
+        cv2.rectangle(
+            img_mgn,
+            (0, 0), (mgn_w, height), mgn_col, -1)
+
+        img_out = cv2.hconcat([img, img_mgn, img_obs])
+
+
+        return img_out
+
+
+    def draw_robot(self, img):
+        """
+        ロボットを描く
+        """
+        unit = self.unit
+        col_agt = (255, 255, 255)
+        col_agt_miss = (0, 0, 255)
+        col_agt_rwd = (50, 200, 50)
+        col_agt_edge = (0, 0, 0)
+
         # 状態で報酬で変える
-        if self.agt_state == 'hit_wall' or \
-            self.agt_state == 'timeover':
+        if self.agt_state in ['hit_wall', 'timeover']:
             col = col_agt_miss
-        elif self.agt_state == 'goal_new':
+        elif self.agt_state == 'goal':
             col = col_agt_rwd
-        elif self.agt_state == 'goal_visited':
-            if self.second_visit_penalty is True:
-                col = col_agt_miss
-            else:
-                col = col_agt
         else:
             col = col_agt
         radius = int(unit * 0.35)
@@ -527,8 +554,15 @@ class Env(core.coreEnv):
         r1 = np.array(r0) + unit * 0.25 * Env.dr[i, :]
         r1 = r1.astype(int)
         cv2.circle(img, tuple(r1), radius, col_agt_edge, -1)
+        return img
 
-        # 観測値の描画 ----------------------
+    def draw_observation(self, unit, height):
+        """
+        観測情報を描く
+        """
+        unit = self.unit
+        col_agt_obs = (50, 50, 255)
+
         observation = self._make_observation()
         obs_ih, obs_iw = observation.shape
         obs_unit = height / obs_ih  # 画像の縦の長さがフィールドと同じになるように obs_unitを決める
@@ -565,17 +599,8 @@ class Env(core.coreEnv):
             r1 = np.array(r0) + obs_unit * 0.25 * Env.dr[0, :]
             r1 = r1.astype(int)
             cv2.circle(img_obs, tuple(r1), radius, col, -1)
-
-        mgn_w = 10  # フィールドと観測値の境界線の太さ
-        mgn_col = (200, 200, 0)
-        img_mgn = np.zeros((height, mgn_w, 3), dtype=np.uint8)
-        cv2.rectangle(
-            img_mgn,
-            (0, 0), (mgn_w, height), mgn_col, -1)
-
-        img_out = cv2.hconcat([img, img_mgn, img_obs])
-
-        return img_out
+        
+        return img_obs
 
 
 def show_obs(observation, action, reward, dones):
