@@ -6,9 +6,15 @@ import sys
 from enum import Enum, auto
 import numpy as np
 import cv2
+from PIL import Image
 import core
 
-PATH_ROBOT = 'rsc/robot.png'
+PATH_ROBOT_NORMAL = 'rsc/robot_normal.png'
+PATH_ROBOT_GOOD = 'rsc/robot_good.png'
+PATH_ROBOT_BAD = 'rsc/robot_bad.png'
+PATH_CRYSTAL = 'rsc/crystal.png'
+PATH_WALL = 'rsc/wall.png'
+PATH_BRANK = 'rsc/brank.png'
 
 
 class TaskType(Enum):
@@ -46,9 +52,8 @@ class Env(core.coreEnv):
             [-1, 0],
             [0, 1],
             [1, 0],
-        ])
-
-    
+        ]) 
+  
 
 
     def __init__(  # pylint:disable=too-many-arguments, too-many-locals
@@ -127,9 +132,13 @@ class Env(core.coreEnv):
         self._truefield = None
 
         # ロボットの画像
-        self.img_robot = cv2.imread(PATH_ROBOT)
-        self.unit = self.img_robot.shape[0]
-
+        self.img_robot_normal = cv2.imread(PATH_ROBOT_NORMAL)
+        self.img_robot_good = cv2.imread(PATH_ROBOT_GOOD)
+        self.img_robot_bad = cv2.imread(PATH_ROBOT_BAD)
+        self.img_crystal = cv2.imread(PATH_CRYSTAL)
+        self.img_brank = cv2.imread(PATH_BRANK)
+        self.img_wall = cv2.imread(PATH_WALL)
+        self.unit = self.img_robot_normal.shape[0]
 
     def set_task_type(self, task_type):
         """
@@ -476,9 +485,11 @@ class Env(core.coreEnv):
         """
         # フィールドの描画 --------------------
         # 色
-        col_brank = (0, 255, 0)
+        # col_brank = (0, 255, 0)
+        col_brank = (200, 200, 255)
         col_wall = (0, 0, 70)
-        col_goal = (255, 100, 0)
+        # col_goal = (255, 100, 0)
+        col_goal = col_brank
 
         # 画像サイズ
         unit = self.unit
@@ -487,23 +498,32 @@ class Env(core.coreEnv):
         img = np.zeros((height, width, 3), dtype=np.uint8)
 
         # 背景の描画
-        cv2.rectangle(img, (0, 0), (width-1, height-1), col_brank, -1)
+        # cv2.rectangle(img, (0, 0), (width-1, height-1), col_brank, -1)
 
         # 壁とゴールの描画
         for i_x in range(self.field_size):
             for i_y in range(self.field_size):
-                col = None
+                # col = None
+                r0 = (unit * i_x, unit * i_y)
                 if self._truefield[i_y, i_x] == Env.ID_wall:
                     # 壁
-                    col = col_wall
-                elif self._truefield[i_y, i_x] == Env.ID_goal:
-                    # ゴール
-                    col = col_goal
+                    # col = col_wall
+                    self.copy_img(img, self.img_wall, r0[0], r0[1])
+                else:
+                    self.copy_img(img, self.img_brank, r0[0], r0[1])
 
+                if self._truefield[i_y, i_x] == Env.ID_goal:
+                    # ゴール
+                    self.copy_img(img, self.img_crystal, r0[0], r0[1], isTrans=True)
+                    # col = col_goal
+                """
                 if col is not None:
                     r0 = (unit * i_x, unit * i_y)
                     r1 = (r0[0] + unit - 1,  r0[1] + unit - 1)
                     cv2.rectangle(img, r0, r1, col, -1)
+                    if self._truefield[i_y, i_x] == Env.ID_goal:
+                        img = self.copy_img(img, self.img_crystal, r0[0], r0[1], isTrans=True)
+                """                             
 
         # ロボットの体の描画
         img = self.draw_robot(img)
@@ -529,32 +549,52 @@ class Env(core.coreEnv):
         """
         ロボットを描く
         """
-        unit = self.unit
-        col_agt = (255, 255, 255)
-        col_agt_miss = (0, 0, 255)
-        col_agt_rwd = (50, 200, 50)
-        col_agt_edge = (0, 0, 0)
-
-        # 状態で報酬で変える
-        if self.agt_state in ['hit_wall', 'timeover']:
-            col = col_agt_miss
+        if self.agt_state == 'hit_wall':
+            img_robot = self.img_robot_bad.copy()
         elif self.agt_state == 'goal':
-            col = col_agt_rwd
+            img_robot = self.img_robot_good.copy()
         else:
-            col = col_agt
-        radius = int(unit * 0.35)
-        r0 = (self.agt_pos + np.array([0.5, 0.5]))* unit
-        r0 = r0.astype(int)
-        cv2.circle(img, tuple(r0), radius, col, -1)
-        cv2.circle(img, tuple(r0), radius, col_agt_edge, 2)
+            img_robot = self.img_robot_normal.copy()
+        
+        unit = self.unit
+        x0, y0 = np.array(self.agt_pos) * unit
+        x1 = x0 + unit
+        y1 = y0 + unit
 
-        # ロボットの方向の描画
-        radius = int(unit * 0.2)
-        i = self.agt_dir
-        r1 = np.array(r0) + unit * 0.25 * Env.dr[i, :]
-        r1 = r1.astype(int)
-        cv2.circle(img, tuple(r1), radius, col_agt_edge, -1)
+
+        if self.agt_dir == 1:
+            # 左90度回転
+            img_robot = cv2.rotate(img_robot, cv2.ROTATE_90_COUNTERCLOCKWISE)
+        elif self.agt_dir == 2:
+            # 180度回転
+            img_robot = cv2.rotate(img_robot, cv2.ROTATE_180)
+        elif self.agt_dir == 3:
+            # 右90度回転
+            img_robot = cv2.rotate(img_robot, cv2.ROTATE_90_CLOCKWISE)
+
+        # ロボット画像の白の部分を背景で置き換える（透過処理）
+        img = self.copy_img(img, img_robot, x0, y0, isTrans=True)
+        """
+        idx = np.where(np.all(img_robot==255, axis=-1))
+        img_back = img[y0:y1, x0:x1, :].copy()
+        img_robot[idx] = img_back[idx]
+        img[y0:y1, x0:x1, :] = img_robot
+        """
+
         return img
+
+    
+    def copy_img(self, img, img_obj, x, y, isTrans=False):
+        h, w = img_obj.shape[:2]
+        x1 = x + w
+        y1 = y + h
+        if isTrans is True:
+            idx = np.where(np.all(img_obj==255, axis=-1))
+            img_back = img[y:y1, x:x1, :].copy()
+            img_obj[idx] = img_back[idx]
+        img[y:y1, x:x1, :] = img_obj
+        return img
+
 
     def draw_observation(self, unit, height):
         """
@@ -580,7 +620,9 @@ class Env(core.coreEnv):
                 r1 = (int(r0[0] + obs_unit * rate),  int(r0[1] + obs_unit * rate))
                 cv2.rectangle(img_obs, r0, r1, col, -1)
 
-        # 中心にロボットを描画
+        # 中心にマークを描画
+
+
         cy = int((obs_ih - 1) / 2)
         if obs_iw == obs_ih * 2:
             cxs = (cy, obs_ih + cy)
@@ -589,6 +631,11 @@ class Env(core.coreEnv):
 
         col = col_agt_obs  # ロボットの色
         for cx in cxs:
+            r0 = (int(obs_unit * cx), int(obs_unit * cy))
+            r1 = (int(r0[0] + obs_unit * rate),  int(r0[1] + obs_unit * rate))
+            cv2.rectangle(img_obs, r0, r1, col, 2)
+            
+            """
             radius = int(obs_unit * 0.35)
             r0 = (int(obs_unit * (cx + rate * 0.5)),
                   int(obs_unit * (cy + rate * 0.5)))
@@ -599,6 +646,7 @@ class Env(core.coreEnv):
             r1 = np.array(r0) + obs_unit * 0.25 * Env.dr[0, :]
             r1 = r1.astype(int)
             cv2.circle(img_obs, tuple(r1), radius, col, -1)
+            """
         
         return img_obs
 
