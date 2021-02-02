@@ -6,20 +6,21 @@ import os
 import sys
 import copy
 
-import env_swanptour as envnow
-from env_swanptour import TaskType
+import env_crystal as envnow
+from env_crystal import TaskType
 import trainer
 import mng_agt_history
+import myutil
 
 SAVE_DIR = 'agt_data'
-ENV_NAME = 'env_swanptour'
+ENV_NAME = 'env_crystal'
 
 argvs = sys.argv
 if len(argvs) < 4:
     MSG = '\n' + \
         '---- 使い方 ---------------------------------------\n' + \
         '3つのパラメータを指定して実行します\n\n' + \
-        '> python sim_swanptour.py [agt_type] [task_type] [process_type]\n\n' + \
+        '> python sim_crystal.py [agt_type] [task_type] [process_type]\n\n' + \
         '[agt_type]\t: tableQ, netQ\n' + \
         '[task_type]\t: %s\n' % ', '.join([t.name for t in TaskType]) + \
         '[process_type]\t:learn/L, more/M, graph/G, anime/A\n' + \
@@ -91,7 +92,7 @@ elif task_type == TaskType.open_field:
     AGT_EPSILON = 0.2
     AGT_ANIME_EPSILON = 0.0
 
-elif task_type == TaskType.many_swamp:
+elif task_type == TaskType.four_crystals:
     N_STEP = 5000
     SHOW_Q_INTERVAL =1000
     EARY_STOP_STEP = 22

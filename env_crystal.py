@@ -1,5 +1,5 @@
 """
-env_swanptour.py
+env_crystal.py
 池巡りの環境
 """
 import sys
@@ -7,12 +7,15 @@ from enum import Enum, auto
 import numpy as np
 import cv2
 from PIL import Image
+
+# 自作モジュール
 import core
+import myutil
 
 PATH_ROBOT_NORMAL = 'rsc/robot_normal.png'
 PATH_ROBOT_GOOD = 'rsc/robot_good.png'
 PATH_ROBOT_BAD = 'rsc/robot_bad.png'
-PATH_CRYSTAL = 'rsc/crystal.png'
+PATH_CRYSTAL = 'rsc/crystal_big.png'
 PATH_WALL = 'rsc/wall.png'
 PATH_BRANK = 'rsc/brank.png'
 
@@ -23,7 +26,7 @@ class TaskType(Enum):
     """
     silent_ruin = auto()
     open_field = auto()
-    many_swamp = auto()
+    four_crystals = auto()
     # mytask = auto() # オリジナルタスクタイプを追加
 
     @classmethod
@@ -54,8 +57,6 @@ class Env(core.coreEnv):
             [1, 0],
         ]) 
   
-
-
     def __init__(  # pylint:disable=too-many-arguments, too-many-locals
             self,
             field_size=5,
@@ -127,11 +128,10 @@ class Env(core.coreEnv):
         self.reward = None
         self.action = None
         self.time = None
-        self.is_first_step = True  # エピソードの最初のstepのみTrue
         self.agt_state = None  # render 用
         self._truefield = None
 
-        # ロボットの画像
+        # 画像のロード
         self.img_robot_normal = cv2.imread(PATH_ROBOT_NORMAL)
         self.img_robot_good = cv2.imread(PATH_ROBOT_GOOD)
         self.img_robot_bad = cv2.imread(PATH_ROBOT_BAD)
@@ -170,7 +170,7 @@ class Env(core.coreEnv):
             self.maze_type = 'random'
             self.wall_observable = False
 
-        elif task_type == TaskType.many_swamp:
+        elif task_type == TaskType.four_crystals:
             self.field_size = 7
             self.sight_size = 2
             self.max_time = 30
@@ -182,8 +182,6 @@ class Env(core.coreEnv):
             self.reward_goal = 1
             self.maze_type = 'random'
             self.wall_observable = True
-
-
         else:
             raise ValueError('task_type が間違っています')
 
@@ -191,7 +189,6 @@ class Env(core.coreEnv):
         self.done = False
         self.reward = None
         self.action = None
-        self.is_first_step = True
         self.agt_state = 'move'  # render 用
         self.time = 0
         self.n_visited_goal = 0
@@ -204,7 +201,7 @@ class Env(core.coreEnv):
                 possible_goal = self._maze_check()
                 if possible_goal == self.n_goal:
                     break
-                if i >= 98:
+                if i == 99:
                     raise ValueError('迷路が生成できません。壁の数を減らしてください')
 
         elif self.maze_type == 'fixed_maze01':
@@ -220,7 +217,6 @@ class Env(core.coreEnv):
 
         else:
             raise ValueError('maze_type が間違っています')
-
 
         observation = self._make_observation()
         return observation
@@ -484,12 +480,6 @@ class Env(core.coreEnv):
         ※エージェントの入力情報ではなくユーザー用
         """
         # フィールドの描画 --------------------
-        # 色
-        # col_brank = (0, 255, 0)
-        col_brank = (200, 200, 255)
-        col_wall = (0, 0, 70)
-        # col_goal = (255, 100, 0)
-        col_goal = col_brank
 
         # 画像サイズ
         unit = self.unit
@@ -497,36 +487,25 @@ class Env(core.coreEnv):
         height = unit * self.field_size
         img = np.zeros((height, width, 3), dtype=np.uint8)
 
-        # 背景の描画
-        # cv2.rectangle(img, (0, 0), (width-1, height-1), col_brank, -1)
-
-        # 壁とゴールの描画
+        # ブロック各種の描画
         for i_x in range(self.field_size):
             for i_y in range(self.field_size):
                 # col = None
                 r0 = (unit * i_x, unit * i_y)
                 if self._truefield[i_y, i_x] == Env.ID_wall:
                     # 壁
-                    # col = col_wall
-                    self.copy_img(img, self.img_wall, r0[0], r0[1])
+                    myutil.copy_img(img, self.img_wall, r0[0], r0[1])
                 else:
-                    self.copy_img(img, self.img_brank, r0[0], r0[1])
+                    # ブランク
+                    myutil.copy_img(img, self.img_brank, r0[0], r0[1])
 
                 if self._truefield[i_y, i_x] == Env.ID_goal:
                     # ゴール
-                    self.copy_img(img, self.img_crystal, r0[0], r0[1], isTrans=True)
+                    myutil.copy_img(img, self.img_crystal, r0[0], r0[1], isTrans=True)
                     # col = col_goal
-                """
-                if col is not None:
-                    r0 = (unit * i_x, unit * i_y)
-                    r1 = (r0[0] + unit - 1,  r0[1] + unit - 1)
-                    cv2.rectangle(img, r0, r1, col, -1)
-                    if self._truefield[i_y, i_x] == Env.ID_goal:
-                        img = self.copy_img(img, self.img_crystal, r0[0], r0[1], isTrans=True)
-                """                             
 
-        # ロボットの体の描画
-        img = self.draw_robot(img)
+        # ロボットの描画
+        self.draw_robot(img)
 
         # 観測値の描画
         img_obs = self.draw_observation(unit, height)
@@ -540,7 +519,6 @@ class Env(core.coreEnv):
             (0, 0), (mgn_w, height), mgn_col, -1)
 
         img_out = cv2.hconcat([img, img_mgn, img_obs])
-
 
         return img_out
 
@@ -573,26 +551,8 @@ class Env(core.coreEnv):
             img_robot = cv2.rotate(img_robot, cv2.ROTATE_90_CLOCKWISE)
 
         # ロボット画像の白の部分を背景で置き換える（透過処理）
-        img = self.copy_img(img, img_robot, x0, y0, isTrans=True)
-        """
-        idx = np.where(np.all(img_robot==255, axis=-1))
-        img_back = img[y0:y1, x0:x1, :].copy()
-        img_robot[idx] = img_back[idx]
-        img[y0:y1, x0:x1, :] = img_robot
-        """
+        img = myutil.copy_img(img, img_robot, x0, y0, isTrans=True)
 
-        return img
-
-    
-    def copy_img(self, img, img_obj, x, y, isTrans=False):
-        h, w = img_obj.shape[:2]
-        x1 = x + w
-        y1 = y + h
-        if isTrans is True:
-            idx = np.where(np.all(img_obj==255, axis=-1))
-            img_back = img[y:y1, x:x1, :].copy()
-            img_obj[idx] = img_back[idx]
-        img[y:y1, x:x1, :] = img_obj
         return img
 
 

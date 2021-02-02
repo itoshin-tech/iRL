@@ -6,7 +6,16 @@ import sys
 from enum import Enum, auto
 import numpy as np
 import cv2
+
+# 自作モジュール
 import core
+import myutil
+
+PATH_ROBOT_NORMAL = 'rsc/robot_normal.png'
+PATH_ROBOT_GOOD = 'rsc/robot_good.png'
+PATH_ROBOT_BAD = 'rsc/robot_bad.png'
+PATH_CRYSTAL = 'rsc/crystal_small.png'
+PATH_BRANK = 'rsc/brank.png'
 
 
 class TaskType(Enum):
@@ -85,6 +94,14 @@ class Env(core.coreEnv):
         self.reward = None
         self.action = None
         self.agt_state = None # render 用
+
+        # 画像のロード
+        self.img_robot_normal = cv2.imread(PATH_ROBOT_NORMAL)
+        self.img_robot_good = cv2.imread(PATH_ROBOT_GOOD)
+        self.img_robot_bad = cv2.imread(PATH_ROBOT_BAD)
+        self.img_crystal = cv2.imread(PATH_CRYSTAL)
+        self.img_brank = cv2.imread(PATH_BRANK)
+        self.unit = self.img_robot_normal.shape[0]
 
     def set_task_type(self, task_type):
         """
@@ -185,6 +202,7 @@ class Env(core.coreEnv):
 
     def render(self):
         #  パラメータ
+        """
         unit = 50
         col_brank = (0, 255, 0)
         col_agt = (255, 255, 255)
@@ -192,44 +210,44 @@ class Env(core.coreEnv):
         col_agt_rwd = (50, 200, 50)
         col_agt_edge = (0, 0, 0)
         col_goal = (255, 100, 0)
-
+        """
+        unit = self.unit
         width = unit * self.field_length
         height = unit
 
         img = np.zeros((height, width, 3), dtype=np.uint8)
 
-        # 背景の描画
-        cv2.rectangle(img, (0, 0), (width-1, height-1), col_brank, -1)
+        # ブロック各種の描画
+        for i_x in range(self.field_length):
+            myutil.copy_img(img, self.img_brank, unit * i_x, 0)
 
         # ゴールの描画
-        r0 = (unit * self.goal_pos, 0)
-        r1 = (unit * (self.goal_pos + 1), height - 1)
-        cv2.rectangle(img, r0, r1, col_goal, -1)
-
-        # ロボットの色
-        if self.agt_state == 'fail':
-            col = col_agt_miss
-        elif self.agt_state == 'goal':
-            col = col_agt_rwd
-        else:
-            col = col_agt
+        if self.agt_state != 'goal':
+            myutil.copy_img(img, self.img_crystal, unit * self.goal_pos, 0, isTrans=True)
 
         # ロボットの描画
-        radius = int(unit * 0.35)
-        r0 = (int(unit * self.agt_pos + unit/2), int(unit / 2))
-        cv2.circle(img, r0, radius, col, -1)
-        cv2.circle(img, r0, radius, col_agt_edge, 2)
-
-        # ロボットの方向
-        dr = np.array([0, 1])
-        if self.action == 1:
-            dr = np.array([1, 0])
-        radius = int(unit * 0.2)
-        r1 = np.array(r0) + unit * 0.25 * dr
-        r1 = r1.astype(int)
-        cv2.circle(img, tuple(r1), radius, col_agt_edge, -1)
+        self.draw_robot(img)
 
         return img
+
+    def draw_robot(self, img):
+        """
+        ロボットを描く
+        """
+        if self.agt_state == 'fail':
+            img_robot = self.img_robot_bad.copy()
+        elif self.agt_state == 'goal':
+            img_robot = self.img_robot_good.copy()
+        else:
+            img_robot = self.img_robot_normal.copy()
+
+        img_robot = cv2.rotate(img_robot, cv2.ROTATE_90_CLOCKWISE)
+        
+        unit = self.unit
+        x0 = np.array(self.agt_pos) * unit
+        img = myutil.copy_img(img, img_robot, x0, 0, isTrans=True)
+
+        return img        
 
 
 def show_obs(obs, act, rwd, done):
@@ -288,7 +306,7 @@ if __name__ == '__main__':
         key = cv2.waitKey(10)
         if key == ord('q'):
             break
-        if key == ord('d'):
+        if key in [ord('d'), ord(' ')]:
             act = 0
             is_process = True
 
