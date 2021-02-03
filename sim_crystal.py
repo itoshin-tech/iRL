@@ -1,15 +1,15 @@
 """
-sim_swanptour.py
-池巡りの実行ファイル
+sim_crystal.py
+クリスタルタスクの実行ファイル
 """
 import os
 import sys
 import copy
 
+# 自作モジュール
 import env_crystal as envnow
 from env_crystal import TaskType
 import trainer
-import mng_agt_history
 import myutil
 
 SAVE_DIR = 'agt_data'
@@ -48,26 +48,26 @@ if not os.path.exists(SAVE_DIR):
 if process_type in ('learn', 'L'):
     IS_LOAD_DATA = False
     IS_LEARN = True
-    IS_SHOW_ALL_GRAPHS = True
+    IS_SHOW_GRAPH = True
     IS_SHOW_ANIME = False
     ANIME_N_EPISODE = 0
 elif process_type in ('more', 'M'):
     IS_LOAD_DATA = True
     IS_LEARN = True
-    IS_SHOW_ALL_GRAPHS = True
+    IS_SHOW_GRAPH = True
     IS_SHOW_ANIME = False
     ANIME_N_EPISODE = 0
 elif process_type in ('graph', 'G'):
     IS_LOAD_DATA = False
     IS_LEARN = False
-    IS_SHOW_ALL_GRAPHS = True
+    IS_SHOW_GRAPH = True
     IS_SHOW_ANIME = False
     ANIME_N_EPISODE = 0
     print('グラフ表示を終了するには[q]を押します。')
 elif process_type in ('anime', 'A'):
     IS_LOAD_DATA = True
     IS_LEARN = False
-    IS_SHOW_ALL_GRAPHS = False
+    IS_SHOW_GRAPH = False
     IS_SHOW_ANIME = True
     ANIME_N_EPISODE = 100
     print('アニメーションを途中で止めるには[q]を押します。')
@@ -78,41 +78,41 @@ else:
 # task_type paramter //////////
 if task_type == TaskType.silent_ruin:
     N_STEP = 5000
-    SHOW_Q_INTERVAL =200
-    EARY_STOP_STEP = 15
-    EARY_STOP_REWARD = None
+    EVAL_INTERVAL =200
+    TARGET_STEP = 14
+    TARGET_REWARD = 0.8
     AGT_EPSILON = 0.4
     AGT_ANIME_EPSILON = 0.0
 
 elif task_type == TaskType.open_field:
     N_STEP = 5000
-    SHOW_Q_INTERVAL =200
-    EARY_STOP_STEP = 4
-    EARY_STOP_REWARD = 1.2
+    EVAL_INTERVAL =200
+    TARGET_STEP = 4
+    TARGET_REWARD = 0.75
     AGT_EPSILON = 0.2
     AGT_ANIME_EPSILON = 0.0
 
 elif task_type == TaskType.four_crystals:
     N_STEP = 5000
-    SHOW_Q_INTERVAL =1000
-    EARY_STOP_STEP = 22
-    EARY_STOP_REWARD = 1.4
+    EVAL_INTERVAL =1000
+    TARGET_STEP = 22
+    TARGET_REWARD = 1.4
     AGT_EPSILON = 0.4
     AGT_ANIME_EPSILON = 0.0
     """
 elif task_type == TaskType.mytask:  # mytaskのパラメータ追加
     N_STEP = 5000
-    SHOW_Q_INTERVAL =1000
-    EARY_STOP_STEP = None
-    EARY_STOP_REWARD = None
+    EVAL_INTERVAL =1000
+    TARGET_STEP = None
+    TARGET_REWARD = None
     AGT_EPSILON = 0.4
     AGT_ANIME_EPSILON = 0.0
     """
 else:
     N_STEP = 5000
-    SHOW_Q_INTERVAL =1000
-    EARY_STOP_STEP = None
-    EARY_STOP_REWARD = None
+    EVAL_INTERVAL =1000
+    TARGET_STEP = None
+    TARGET_REWARD = None
     AGT_EPSILON = 0.4
     AGT_ANIME_EPSILON = 0.0
     print('シミュレーションにデフォルトパラメータを設定しました。')
@@ -156,7 +156,7 @@ else:
 sim_prm = {
     'N_STEP': N_STEP,
     'n_episode': -1,
-    'SHOW_Q_INTERVAL': SHOW_Q_INTERVAL,
+    'EVAL_INTERVAL': EVAL_INTERVAL,
     'IS_LEARN': IS_LEARN,
     'is_animation': False,
     'show_delay': 0.5,
@@ -165,8 +165,8 @@ sim_prm = {
     'eval_epsilon': 0.0,
     'eval_is_animation': False,
     'eval_show_delay': 0.0,
-    'EARY_STOP_STEP': EARY_STOP_STEP,
-    'EARY_STOP_REWARD': EARY_STOP_REWARD,
+    'TARGET_STEP': TARGET_STEP,
+    'TARGET_REWARD': TARGET_REWARD,
 }
 
 # animation pramter //////////
@@ -181,10 +181,7 @@ sim_anime_prm = {
 }
 
 # trainer paramter //////////
-obss = [[obs.tolist(), obs2.tolist()]]
 trn_prm = {
-    'obss': obss,
-    'is_show_Q': False,
     'show_header': '%s %s ' % (agt_type, task_type.name),
 }
 
@@ -227,9 +224,10 @@ if (IS_LOAD_DATA is True) or \
         agt.epsilon = AGT_ANIME_EPSILON
         trn.simulate(**sim_anime_prm)
 
-if IS_SHOW_ALL_GRAPHS is True:
+if IS_SHOW_GRAPH is True:
     # グラフ表示
-    agt_names = [agt_type]
-    filepaths = [agt_prm['filepath']]
-    agth = mng_agt_history.MngAgtHistory(agt_names, filepaths)
-    agth.show_all_graphs(agt_names)
+    myutil.show_graph(
+        agt_prm['filepath'],
+        target_reward=TARGET_REWARD,
+        target_step=TARGET_STEP,
+        )

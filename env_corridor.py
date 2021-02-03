@@ -23,7 +23,7 @@ class TaskType(Enum):
     タスクタイプの列挙型
     """
     L4g23 = auto()
-    L5g34 = auto()
+    L5g1to4 = auto()
     # mytask = auto() # オリジナルタスクタイプを追加
 
     @classmethod
@@ -116,9 +116,9 @@ class Env(core.coreEnv):
             self.reward_move = 0
             self.reward_goal = 1
 
-        elif task_type == TaskType.L5g34:
+        elif task_type == TaskType.L5g1to4:
             self.field_length = 5
-            self.goal_candidate = (3, 4)
+            self.goal_candidate = (1, 2, 3, 4)
             self.pos_start = 0
             self.reward_fail = 0
             self.reward_move = 0
@@ -226,11 +226,11 @@ class Env(core.coreEnv):
             myutil.copy_img(img, self.img_crystal, unit * self.goal_pos, 0, isTrans=True)
 
         # ロボットの描画
-        self.draw_robot(img)
+        self._draw_robot(img)
 
         return img
 
-    def draw_robot(self, img):
+    def _draw_robot(self, img):
         """
         ロボットを描く
         """
@@ -250,7 +250,7 @@ class Env(core.coreEnv):
         return img        
 
 
-def show_obs(obs, act, rwd, done):
+def _show_obs(obs, act, rwd, done):
     """
     変数を表示
     """
@@ -299,7 +299,7 @@ if __name__ == '__main__':
     act = None
     rwd = None
     done = False
-    show_obs(obs, act, rwd, done)
+    _show_obs(obs, act, rwd, done)
     while True:
         image = env.render()
         cv2.imshow('env', image)
@@ -323,6 +323,6 @@ if __name__ == '__main__':
             else:
                 obs, rwd, done = env.step(act)
 
-            show_obs(obs, act, rwd, done)
+            _show_obs(obs, act, rwd, done)
 
             is_process = False

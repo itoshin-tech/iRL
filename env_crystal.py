@@ -1,12 +1,11 @@
 """
 env_crystal.py
-池巡りの環境
+クリスタルタスクの環境
 """
 import sys
 from enum import Enum, auto
 import numpy as np
 import cv2
-from PIL import Image
 
 # 自作モジュール
 import core
@@ -15,7 +14,9 @@ import myutil
 PATH_ROBOT_NORMAL = 'rsc/robot_normal.png'
 PATH_ROBOT_GOOD = 'rsc/robot_good.png'
 PATH_ROBOT_BAD = 'rsc/robot_bad.png'
-PATH_CRYSTAL = 'rsc/crystal_big.png'
+#PATH_CRYSTAL = 'rsc/crystal_small.png'
+# PATH_CRYSTAL = 'rsc/crystal_big.png'
+PATH_CRYSTAL = 'rsc/crystal.png'
 PATH_WALL = 'rsc/wall.png'
 PATH_BRANK = 'rsc/brank.png'
 
@@ -205,6 +206,12 @@ class Env(core.coreEnv):
                     raise ValueError('迷路が生成できません。壁の数を減らしてください')
 
         elif self.maze_type == 'fixed_maze01':
+            """
+            ' ': brank
+            'g': goal
+            'w': wall
+            """
+
             maze = [
                 'wwg  ',
                 ' w  w',
@@ -213,7 +220,7 @@ class Env(core.coreEnv):
                 'w    ',
                 ]
             self.n_goal = 2
-            self.my_maze(maze, start_pos=(4, 4), start_dir=0)
+            self._my_maze(maze, start_pos=(4, 4), start_dir=0)
 
         else:
             raise ValueError('maze_type が間違っています')
@@ -222,7 +229,7 @@ class Env(core.coreEnv):
         return observation
 
 
-    def my_maze(self, maze, start_pos=(0, 0), start_dir=0):
+    def _my_maze(self, maze, start_pos=(0, 0), start_dir=0):
         """
         文字で表した迷路を行列に変換
 
@@ -278,14 +285,14 @@ class Env(core.coreEnv):
 
         # wall
         for _ in range(self.n_wall):
-            for j in range(99):
+            for i in range(100):
                 x_val = np.random.randint(0, self.field_size)
                 y_val = np.random.randint(0, self.field_size)
                 if not(self.agt_pos[0] == x_val and self.agt_pos[1] ==y_val) and \
                         self._truefield[y_val, x_val] == Env.ID_brank:
                     self._truefield[y_val, x_val] = Env.ID_wall
                     break
-            if j >= 98:
+            if i == 99:
                 print('壁の数が多すぎて迷路が作れません')
                 sys.exit()
 
@@ -505,10 +512,10 @@ class Env(core.coreEnv):
                     # col = col_goal
 
         # ロボットの描画
-        self.draw_robot(img)
+        self._draw_robot(img)
 
         # 観測値の描画
-        img_obs = self.draw_observation(unit, height)
+        img_obs = self._draw_observation(unit, height)
 
         # 画像の統合
         mgn_w = 10  # フィールドと観測値の境界線の太さ
@@ -523,7 +530,7 @@ class Env(core.coreEnv):
         return img_out
 
 
-    def draw_robot(self, img):
+    def _draw_robot(self, img):
         """
         ロボットを描く
         """
@@ -556,7 +563,7 @@ class Env(core.coreEnv):
         return img
 
 
-    def draw_observation(self, unit, height):
+    def _draw_observation(self, unit, height):
         """
         観測情報を描く
         """
@@ -611,7 +618,7 @@ class Env(core.coreEnv):
         return img_obs
 
 
-def show_obs(observation, action, reward, dones):
+def _show_obs(observation, action, reward, dones):
     """
     変数を表示
     """
@@ -659,7 +666,7 @@ if __name__ == '__main__':
     act = None
     rwd = None
     done = False
-    show_obs(obs, act, rwd, done)
+    _show_obs(obs, act, rwd, done)
     while True:
         image = env.render()
         cv2.imshow('env', image)
@@ -687,6 +694,6 @@ if __name__ == '__main__':
             else:
                 obs, rwd, done = env.step(act)
 
-            show_obs(obs, act, rwd, done)
+            _show_obs(obs, act, rwd, done)
 
             is_process = False

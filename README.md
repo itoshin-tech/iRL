@@ -145,7 +145,7 @@ netQ many_swamp  5000 --- 23 sec, eval_rwd -1.29, eval_steps  28.90
 
 1000回に1回、評価のプロセスがあり、そこで、eval_rwdとeval_stepが計算されます。eval_rwd は、その時の1エピソード中の平均報酬、eval_steps は平均step数です。評価は、行動選択のノイズは0にして行われます。
 
-eval_rwdやeval_step を指標として学習が目標値に進んだときにも学習は終了するようになっています（EARY_STOP）。
+eval_rwdやeval_step を指標として学習が目標値に進んだときにも学習は終了するようになっています（TARGET）。
 
 最後に以下のような学習過程のグラフ（eval_rwd, eval_steps）が表示されます。
 [q]を押すとグラフが消え終了します。
@@ -172,13 +172,13 @@ eval_rwdやeval_step を指標として学習が目標値に進んだときに�
 (iRL)> python sim_swanptour.py netQ many_swamp M
 ```
 　
-このコマンドを数回繰り返します。EARY_STOPが表示されて途中終了すると、学習が良いところまで進んだといえます。many_swampは、eval_rwd が1.4以上または、eval_steps が22以下になるとEARY_STOPとなります。
+このコマンドを数回繰り返します。TARGETが表示されて途中終了すると、学習が良いところまで進んだといえます。many_swampは、eval_rwd が1.4以上または、eval_steps が22以下になるとTARGETとなります。
 
 ```
 netQ many_swamp  1000 --- 5 sec, eval_rwd  0.55, eval_steps  24.25
 netQ many_swamp  2000 --- 9 sec, eval_rwd  0.92, eval_steps  23.52
 netQ many_swamp  3000 --- 14 sec, eval_rwd  1.76, eval_steps  21.69
-EARY_STOP_STEP 22 >= 21
+TARGET_STEP 22 >= 21
 ```
 
 グラフが最後に表示されます。エピソード当たりの報酬(rwd)が増加し、ステップ数(Steps)が減少していることから、学習が進んでいたことが分かります。

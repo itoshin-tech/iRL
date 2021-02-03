@@ -18,18 +18,15 @@ class Trainer:
         env=None,
         eval_env=None,
         obss=None,
-        is_show_Q=True,
         show_header='',
         ):
         self.agt = agt
         self.env = env
         self.eval_env = eval_env
         self.obss = obss
-        self.is_show_Q = is_show_Q
         self.show_header = show_header
 
         # 変数
-        self.hist_Qss = []
         self.hist_eval_rwds_in_episode = []
         self.hist_eval_steps_in_episode = []
         self.hist_eval_x = []
@@ -41,7 +38,7 @@ class Trainer:
     def simulate(self,
         N_STEP=1000,
         n_episode=-1,
-        SHOW_Q_INTERVAL=100,
+        EVAL_INTERVAL=100,
         IS_LEARN=True,
         is_animation=False,
         show_delay=0.5,
@@ -50,8 +47,8 @@ class Trainer:
         eval_epsilon=0.0,
         eval_show_delay=0.1,
         eval_is_animation=False,
-        EARY_STOP_STEP=None,
-        EARY_STOP_REWARD=None,
+        TARGET_STEP=None,
+        TARGET_REWARD=None,
         ):
         """
         エージェントを環境で動かす
@@ -98,9 +95,7 @@ class Trainer:
                     break
 
             # 一定の間隔で記録と評価と途中経過表示
-            if (timestep % SHOW_Q_INTERVAL == 0) and (timestep > 0):
-                hist_Qs = self._show_Q() #  self.is_show_Q == True で表示
-                self.hist_Qss.append(hist_Qs)
+            if (timestep % EVAL_INTERVAL == 0) and (timestep > 0):
 
                 # 評価
                 eval_rwds_in_episode = None
@@ -136,19 +131,20 @@ class Trainer:
                             )
                         )
 
-
+                """
                 # 条件をクリアしていたら途中で学習を停止
-                if EARY_STOP_STEP is not None:
-                    if EARY_STOP_STEP >= eval_steps_in_episode:
-                        print('EARY_STOP_STEP %d >= %d' % \
-                              (EARY_STOP_STEP, eval_steps_in_episode))
+                if TARGET_STEP is not None:
+                    if TARGET_STEP >= eval_steps_in_episode:
+                        print('TARGET_STEP %d >= %d' % \
+                              (TARGET_STEP, eval_steps_in_episode))
                         return
-                if EARY_STOP_REWARD is not None:
-                    if EARY_STOP_REWARD <= eval_rwds_in_episode:
-                        print('EARY_STOP_REWARD %.5f <= %.5f' % \
-                              (EARY_STOP_REWARD, eval_rwds_in_episode))
+                if TARGET_REWARD is not None:
+                    if TARGET_REWARD <= eval_rwds_in_episode:
+                        print('TARGET_REWARD %.5f <= %.5f' % \
+                              (TARGET_REWARD, eval_rwds_in_episode))
                         return
-
+                """
+                
             # 指定したstepかepisode数に達したら終了
             if N_STEP > 0:
                 if timestep >= N_STEP:
@@ -160,6 +156,9 @@ class Trainer:
             timestep += 1
             episode += done
 
+        # Q値を表示
+        self._show_Q()
+ 
         return
 
     def off_simulation(self):
@@ -226,55 +225,25 @@ class Trainer:
         return self.eval_simhist
 
     def _show_Q(self):
-        self.agt.save_state()
-        self.agt.reset()
-        Qs = []
-        if self.agt.n_action == 2:
-            self._log('observation:  Q(0)   Q(1)')
-        else:
-            self._log('observation : Q')
+        if self.obss is None:
+            return
+
+        print('')
+        print('Q values')
         for obss in self.obss:
             for obs in obss:
-                if self.agt.n_action == 2:
-                    val = self.agt.get_Q(np.array(obs))
-                    if val[0] is None:
-                        pass
-                    elif val[0] > val[1]:
-                        dirc = '>'
-                    else:
-                        dirc = '<'
+                val = self.agt.get_Q(np.array(obs))
+                if val[0] is not None:
+                    valstr = [' %.2f' % v for v in val]
+                    print('Obs:%s  Q:%s' % (str(np.array(obs)), ','.join(valstr)))
+            print('')
 
-                    if val[0] is None:
-                        self._log('%s : None' % (str(np.array(obs))))
-                        Qs.append((None, ) * self.agt.n_action)
-                    else:
-                        msg = '%s  : % 5.2f %s % 5.2f' \
-                            % (str(np.array(obs)), val[0], dirc, val[1])
-                        self._log(msg)
-                        Qs.append(val.copy())
-                else:
-                    val = self.agt.get_Q(np.array(obs))
-                    self._log('%s' % (str(np.array(obs))))
-                    if val[0] is not None:
-                        self._log('Q:' + str(np.round(val, 2)))
-                        Qs.append(val.copy())
-                    else:
-                        Qs.append((None,) * self.agt.n_action)
-
-            self._log('')
-        self.agt.load_state()
-        return Qs
-
-    def _log(self, msg):
-        if self.is_show_Q is True:
-            print(msg)
 
     def save_history(self, pathname):
         """
         履歴をセーブ
         """
         np.savez(pathname + '.npz',
-            hist_Qss=self.hist_Qss,
             eval_rwds=self.hist_eval_rwds_in_episode,
             eval_steps=self.hist_eval_steps_in_episode,
             eval_x=self.hist_eval_x,
@@ -285,7 +254,6 @@ class Trainer:
         履歴をロード
         """
         hist = np.load(pathname + '.npz')
-        self.hist_Qss = hist['hist_Qss'].tolist()
         self.hist_eval_rwds_in_episode = hist['eval_rwds'].tolist()
         self.hist_eval_steps_in_episode = hist['eval_steps'].tolist()
         self.hist_eval_x = hist['eval_x'].tolist()

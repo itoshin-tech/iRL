@@ -1,7 +1,8 @@
 """
-便利な関数
+共通で使う関数
 """
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 def copy_img(img, img_obj, x, y, isTrans=False):
@@ -37,3 +38,41 @@ def copy_img(img, img_obj, x, y, isTrans=False):
     
     return img
   
+
+
+def show_graph(pathname, target_reward=None, target_step=None):
+    """
+    学習曲線の表示
+    """
+    hist = np.load(pathname + '.npz')
+    eval_rwd = hist['eval_rwds'].tolist()
+    eval_step = hist['eval_steps'].tolist()
+    eval_x = hist['eval_x'].tolist()
+
+    plt.figure(figsize=(10,5))
+    plt.subplots_adjust(hspace=0.6)
+
+    # reward / episode
+    plt.subplot(211)
+    plt.plot(eval_x, eval_rwd, 'b.-')
+    if target_reward is not None:
+        plt.plot(
+            [eval_x[0], eval_x[-1]],
+            [target_reward, target_reward],
+            'r:')
+
+    plt.title('reward / episode')
+    plt.grid(True)
+
+    # steps / episode
+    plt.subplot(212)
+    plt.plot(eval_x, eval_step, 'b.-')
+    if target_step is not None:
+        plt.plot(
+            [eval_x[0], eval_x[-1]],
+            [target_step, target_step],
+            'r:')
+    plt.title('steps / episode')
+    plt.grid(True)
+
+    plt.show()
