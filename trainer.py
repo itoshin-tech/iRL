@@ -20,6 +20,20 @@ class Trainer:
         obss=None,
         show_header='',
         ):
+        """
+        Parameters
+        ----------
+        agt: Agt class
+            エージェントのインスタンス
+        env: Env class
+            環境のインスタンス
+        eval_env: Env class
+            評価用の環境のインスタンス
+        obss: list of numpy.ndarray
+            Q値をチェックする際の観測値
+        show_header: str
+            学習過程の表示のヘッダー
+        """
         self.agt = agt
         self.env = env
         self.eval_env = eval_env
@@ -37,37 +51,50 @@ class Trainer:
 
     def simulate(self,
         N_STEP=1000,
-        n_episode=-1,
+        N_EPISODE=-1,
         EVAL_INTERVAL=100,
         IS_LEARN=True,
-        is_animation=False,
-        show_delay=0.5,
+        IS_ANIMATION=False,
+        SHOW_DELAY=0.5,
         eval_N_STEP=-1,
-        eval_n_episode=-1,
-        eval_epsilon=0.0,
-        eval_show_delay=0.1,
-        eval_is_animation=False,
-        TARGET_STEP=None,
-        TARGET_REWARD=None,
+        eval_N_EPISODE=-1,
+        eval_EPSILON=0.0,
         ):
         """
         エージェントを環境で動かす
-        """
 
+        Parameters
+        ----------
+        N_STEP: int
+            シミュレーションを行うステップ数
+        N_EPISODE: int
+            シミュレーションを行うエピソード数
+            -1にするとステップ数が採用される
+        EVAL_INTERVAL: int
+            何ステップ毎に評価を行うかを決める
+        IS_LEARN: bool
+            True: 学習をする
+        IS_ANIMATION: bool
+            True: アニメーションを見せる
+        SHOW_DELAY: int
+            アニメーションをする際のディレイ(ms)
+        eval_xxx: 
+            評価用のパラメータ
+        """
+        # 開始時間の記録
         stime = time.time()
 
+        # 環境クラスと変数を初期化
         obs = self.env.reset()
-        self.agt.reset()
-
         timestep = 0
         episode = 0
         done = False
         self.on_simulation = True
 
-        # シミュレーション
+        # シミュレーション開始
         while self.on_simulation:
-            # 通常のステップ
             if done is False:
+                # 通常のステップ
                 act = self.agt.select_action(obs)
                 next_obs, rwd, next_done = self.env.step(act)
 
@@ -75,41 +102,40 @@ class Trainer:
                 if IS_LEARN is True:
                     self.agt.learn(obs, act, rwd, next_obs, next_done)
 
-            # 最終状態での処理
             else:
+                # 最終状態でのステップ
                 next_obs = self.env.reset()
                 rwd = None
                 next_done = False
-                self.agt.reset()
 
             obs = next_obs
             done = next_done
 
             # アニメーション描画
-            if is_animation:
+            if IS_ANIMATION:
                 img = self.env.render()
                 cv2.imshow('trainer', img)
-                key = cv2.waitKey(int(show_delay * 1000))
+                key = cv2.waitKey(int(SHOW_DELAY * 1000))
                 if key == ord('q'):
                     self.off_simulation()
                     break
 
-            # 一定の間隔で記録と評価と途中経過表示
+            # 一定のステップ数で記録と評価と表示を行う
             if (timestep % EVAL_INTERVAL == 0) and (timestep > 0):
 
-                # 評価
+                # 記録用変数の初期化
                 eval_rwds_in_episode = None
                 eval_steps_in_episode = None
-                if (eval_N_STEP > 0) or (eval_n_episode > 0):
+                if (eval_N_STEP > 0) or (eval_N_EPISODE > 0):
+                    # 評価を行う
                     out = self.evaluation(
                         eval_N_STEP=eval_N_STEP,
-                        eval_n_episode=eval_n_episode,
-                        eval_epsilon=eval_epsilon,
-                        eval_is_animation=eval_is_animation,
-                        eval_show_delay=eval_show_delay,
+                        eval_N_EPISODE=eval_N_EPISODE,
+                        eval_EPSILON=eval_EPSILON,
                     )
+                    # 記録
                     eval_rwds_in_episode = out.mean_rwds[0]
-                    eval_steps_in_episode = out.meaN_STEPs_in_episode[0]
+                    eval_steps_in_episode = out.mean_STEPs_in_episode[0]
                     self.hist_eval_rwds_in_episode.append(eval_rwds_in_episode)
                     self.hist_eval_steps_in_episode.append(eval_steps_in_episode)
                     self.hist_eval_x.append(self.hist_start_x + timestep)
@@ -125,32 +151,18 @@ class Trainer:
                             )
                         )
                 else:
-                    print('%s %d --- %d sec, no evaluation' % (
+                    print('%s %d --- %d sec' % (
                             self.show_header,
                             timestep, ptime,
                             )
                         )
 
-                """
-                # 条件をクリアしていたら途中で学習を停止
-                if TARGET_STEP is not None:
-                    if TARGET_STEP >= eval_steps_in_episode:
-                        print('TARGET_STEP %d >= %d' % \
-                              (TARGET_STEP, eval_steps_in_episode))
-                        return
-                if TARGET_REWARD is not None:
-                    if TARGET_REWARD <= eval_rwds_in_episode:
-                        print('TARGET_REWARD %.5f <= %.5f' % \
-                              (TARGET_REWARD, eval_rwds_in_episode))
-                        return
-                """
-                
             # 指定したstepかepisode数に達したら終了
             if N_STEP > 0:
                 if timestep >= N_STEP:
                     break
-            if n_episode > 0:
-                if episode > n_episode:
+            if N_EPISODE > 0:
+                if episode > N_EPISODE:
                     break
 
             timestep += 1
@@ -169,26 +181,22 @@ class Trainer:
 
     def evaluation(self,
             eval_N_STEP,
-            eval_n_episode,
-            eval_epsilon,
-            eval_is_animation,
-            eval_show_delay,
+            eval_N_EPISODE,
+            eval_EPSILON,
         ):
         """
         学習を止めてエージェントを環境で動作させ、
         パフォーマンスを評価する
         """
-        self.agt.save_state()
         epsilon_backup = self.agt.epsilon
-        self.agt.epsilon = eval_epsilon
-        self.agt.reset()
+        self.agt.epsilon = eval_EPSILON
         self.eval_simhist.reset()
         obs = self.eval_env.reset()
-
-        # simulate
         timestep = 0
         episode = 0
         done = False
+
+        # シミュレーション開始
         while True:
             if done is False:
                 act = self.agt.select_action(obs)
@@ -198,28 +206,21 @@ class Trainer:
                 next_obs = self.eval_env.reset()
                 rwd = None
                 next_done = False
-                self.agt.reset()
+
             obs = next_obs
             done = next_done
-
-            if eval_is_animation:
-                img = self.env.render()
-                cv2.imshow('eval', img)
-                cv2.waitKey(int(eval_show_delay * 1000))
 
             if eval_N_STEP > 0:
                 if timestep >= eval_N_STEP:
                     break
-            if eval_n_episode > 0:
-                if episode > eval_n_episode:
+            if eval_N_EPISODE > 0:
+                if episode > eval_N_EPISODE:
                     break
 
             timestep += 1
             episode += done
         self.eval_simhist.record()
-        cv2.destroyWindow('eval')
 
-        self.agt.load_state()
         self.agt.epsilon = epsilon_backup
 
         return self.eval_simhist
@@ -275,7 +276,7 @@ class SimHistory:
         self.rwds = []
         self.rwd  = 0
 
-        self.meaN_STEPs_in_episode = []
+        self.mean_STEPs_in_episode = []
         self.steps_in_episode = []
         self.step_in_episode = 0
 
@@ -302,6 +303,6 @@ class SimHistory:
         self.mean_rwds.append(np.mean(self.rwds))
         self.rwds = []
 
-        self.meaN_STEPs_in_episode.append(np.mean(self.steps_in_episode))
+        self.mean_STEPs_in_episode.append(np.mean(self.steps_in_episode))
         self.steps_in_episode = []
         self.steps_for_mean.append(self.stepcnt)

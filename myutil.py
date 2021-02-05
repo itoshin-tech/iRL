@@ -39,10 +39,16 @@ def copy_img(img, img_obj, x, y, isTrans=False):
     return img
   
 
-
 def show_graph(pathname, target_reward=None, target_step=None):
     """
     学習曲線の表示
+
+    Parameters
+    ----------
+    target_reward: float or None
+        rewardの目標値に線を引く
+    target_step: float or None
+        stepの目標値に線を引く
     """
     hist = np.load(pathname + '.npz')
     eval_rwd = hist['eval_rwds'].tolist()
@@ -73,6 +79,7 @@ def show_graph(pathname, target_reward=None, target_step=None):
             [target_step, target_step],
             'r:')
     plt.title('steps / episode')
+    plt.xlabel('steps')
     plt.grid(True)
-
+    
     plt.show()

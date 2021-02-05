@@ -24,7 +24,7 @@ if len(argvs) < 4:
         '[agt_type]\t: tableQ, netQ\n' + \
         '[task_type]\t: %s\n' % ', '.join([t.name for t in TaskType]) + \
         '[process_type]\t:learn/L, more/M, graph/G, anime/A\n' + \
-        '例 > python sim_swanptour.py tableQ open_field L\n' + \
+        '例 > python sim_crystal.py tableQ open_field L\n' + \
         '---------------------------------------------------'
     print(MSG)
     sys.exit()
@@ -121,7 +121,6 @@ else:
 env = envnow.Env()
 env.set_task_type(task_type)
 obs = env.reset()
-obs2, _, _ = env.step(0)
 
 # 評価用環境
 eval_env = envnow.Env()
@@ -151,33 +150,28 @@ elif agt_type == 'netQ':
 else:
     ValueError('agt_type が間違っています')
 
-
 # simulation pramter //////////
 sim_prm = {
     'N_STEP': N_STEP,
-    'n_episode': -1,
+    'N_EPISODE': -1,
     'EVAL_INTERVAL': EVAL_INTERVAL,
     'IS_LEARN': IS_LEARN,
-    'is_animation': False,
-    'show_delay': 0.5,
+    'IS_ANIMATION': False,
+    'SHOW_DELAY': 0.5,
     'eval_N_STEP': -1,
-    'eval_n_episode': 100,
-    'eval_epsilon': 0.0,
-    'eval_is_animation': False,
-    'eval_show_delay': 0.0,
-    'TARGET_STEP': TARGET_STEP,
-    'TARGET_REWARD': TARGET_REWARD,
+    'eval_N_EPISODE': 100,
+    'eval_EPSILON': 0.0,
 }
 
 # animation pramter //////////
 sim_anime_prm = {
     'N_STEP': -1,
-    'n_episode': ANIME_N_EPISODE,
+    'N_EPISODE': ANIME_N_EPISODE,
     'IS_LEARN': False,
-    'is_animation': True,
-    'show_delay': 0.2,
+    'IS_ANIMATION': True,
+    'SHOW_DELAY': 0.2,
     'eval_N_STEP': -1,
-    'eval_n_episode': -1,
+    'eval_N_EPISODE': -1,
 }
 
 # trainer paramter //////////
@@ -188,7 +182,7 @@ trn_prm = {
 # メイン //////////
 if (IS_LOAD_DATA is True) or \
     (IS_LEARN is True) or \
-    (sim_prm['is_animation'] is True):
+    (sim_prm['IS_ANIMATION'] is True):
 
     # エージェントをインポートしてインスタンス作成
     if agt_type == 'tableQ':

@@ -40,6 +40,8 @@ class Agt(core.coreAgt):
         filepath: str
             セーブ用のファイル名
         """
+
+        # パラメータ
         self.n_action = n_action
         self.input_size = input_size
         self.epsilon = epsilon
@@ -48,12 +50,16 @@ class Agt(core.coreAgt):
         self.n_dense2 = n_dense2
         self.filepath = filepath
 
-        super().__init__()
-
         # 変数
         self.time = 0
+        self.model = None
+
+        super().__init__()
 
     def build_model(self):
+        """
+        指定したパラメータでモデルを構築する
+        """
         inputs = tf.keras.Input(shape=(self.input_size))
         x = tf.keras.layers.Flatten()(inputs)
         x = tf.keras.layers.Dense(self.n_dense, activation='relu')(x)
@@ -71,6 +77,10 @@ class Agt(core.coreAgt):
         )
 
     def select_action(self, observation):
+        """
+        観測値observationに対して、行動actionを選ぶ
+        """
+
         Q = self.get_Q(observation)
 
         if self.epsilon < np.random.rand():
@@ -80,13 +90,16 @@ class Agt(core.coreAgt):
         return action
 
     def get_Q(self, observation):
+        """
+        観測値observationに対するQ値を出力する
+        """
         obs = self._trans_code(observation)
         Q = self.model.predict(obs.reshape((1,) + self.input_size))[0]
         return Q
 
     def _trans_code(self, observation):
         """
-        observationを内部で変更する場合はこの関数を記述
+        observationを変換する場合にはこの関数内を記述
         """
         return observation
 
@@ -115,15 +128,19 @@ class Agt(core.coreAgt):
         self.model.fit(obs.reshape((1,) + self.input_size), Q, verbose=0, epochs=1)
 
     def save_weights(self, filepath=None):
+        """
+        学習をファイルに保存する
+        """
         if filepath is None:
             filepath = self.filepath
-        # self.model.save_weights(filepath, overwrite=True)
         self.model.save(filepath + '.h5', overwrite=True)
 
     def load_weights(self, filepath=None):
+        """
+        学習をファイルから読み込む
+        """
         if filepath is None:
             filepath = self.filepath
-        # self.model.load_weights(filepath)
         self.model = tf.keras.models.load_model(filepath + '.h5')
 
 

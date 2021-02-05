@@ -107,7 +107,6 @@ class Env(core.coreEnv):
         """
         task_type を指定して、parameterを一括設定する
         """
-
         if task_type == TaskType.L4g23:
             self.field_length = 4
             self.goal_candidate = (2, 3)
@@ -133,7 +132,6 @@ class Env(core.coreEnv):
             self.reward_move = 0
             self.reward_goal = 1
             """
-
         else:
             raise ValueError('task_type が間違っています')
 
@@ -160,7 +158,8 @@ class Env(core.coreEnv):
         """
         action にしたがって環境の状態を 1 step 進める
         """
-        # next state
+
+        # 次の状態を求める
         if action == 1: # 進む
             next_pos = self.agt_pos + 1
             if next_pos >= self.field_length:
@@ -172,7 +171,7 @@ class Env(core.coreEnv):
                 reward = self.reward_move
                 done = False
                 self.agt_state = 'move'
-        elif action == 0: # try
+        elif action == 0: # 試す
             if self.agt_pos == self.goal_pos:
                 reward = self.reward_goal
                 done = True
@@ -201,20 +200,12 @@ class Env(core.coreEnv):
         return observation
 
     def render(self):
-        #  パラメータ
-        """
-        unit = 50
-        col_brank = (0, 255, 0)
-        col_agt = (255, 255, 255)
-        col_agt_miss = (0, 0, 255)
-        col_agt_rwd = (50, 200, 50)
-        col_agt_edge = (0, 0, 0)
-        col_goal = (255, 100, 0)
-        """
+        # 画像サイズ
         unit = self.unit
         width = unit * self.field_length
         height = unit
 
+        # 画像用の変数準備
         img = np.zeros((height, width, 3), dtype=np.uint8)
 
         # ブロック各種の描画
@@ -234,6 +225,7 @@ class Env(core.coreEnv):
         """
         ロボットを描く
         """
+        # ロボット画像の選択
         if self.agt_state == 'fail':
             img_robot = self.img_robot_bad.copy()
         elif self.agt_state == 'goal':
@@ -241,8 +233,10 @@ class Env(core.coreEnv):
         else:
             img_robot = self.img_robot_normal.copy()
 
+        # ロボット画像の回転
         img_robot = cv2.rotate(img_robot, cv2.ROTATE_90_CLOCKWISE)
-        
+
+        # ロボット画像の貼り付け
         unit = self.unit
         x0 = np.array(self.agt_pos) * unit
         img = myutil.copy_img(img, img_robot, x0, 0, isTrans=True)

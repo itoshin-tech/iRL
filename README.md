@@ -1,12 +1,12 @@
 # iRL とは
 
-このiRLでは、例えば、以下のような強化学習タスクを学習させることができます。GPUのない普通のノートPCで学習させることが可能です。筆者の古いノートPCでも4分弱しかかかりませんでした (netQ, many_swamp, 33000 qstep, 3分40秒)。
+このiRLでは、例えば、以下のような強化学習タスクを学習させることができます。GPUのない普通のノートPCで学習させることが可能です。筆者の古いノートPCでも4分弱しかかかりませんでした (netQ, four_crystals, 33000 qstep, 3分40秒)。
 
 ※筆者のノートPCのCPUは、Intel Core i7-6600UでGPUなし。i7でも第6世代なので結構遅く、i5-7500Uの方が上のようです。 [参考：CPU性能比較表 | 最新から定番のCPUまで簡単に比較](https://pcrecommend.com/cpu/)
 
-![](image/20201206_many_swamp01.gif)
+![](image/netQ_35000.gif)
 
-タスクは、ロボットを動かして全てのゴール（水色の4つの領域）に訪れるとクリアというものです。マップはエピソード毎にランダムに生成されます。
+タスクは、ロボットを動かして全てのゴール（水晶）に訪れるとクリアというものです。マップはエピソード毎にランダムに生成されます。
 
 ロボットは2マスまでの周囲しか見えない設定なのですが、「壁はよける」、「ゴールに近づいたらそちらに曲がる」、「何もなければまっすぐ進む」、のようなアルゴリズムで動いているように見えます。このアルゴリズムを強化学習が作ったのです。マップがランダムに変わっても、追加学習をすることなく対応しています。
 
@@ -90,9 +90,9 @@ iRLを展開したフォルダーに入ります。
 (iRL)> cd C:\[解凍したディレクトリ]\iRL-main\  
 ```
 
-sim_swanptour.py を以下のコマンドで実行します。
+sim_crystal.py を以下のコマンドで実行します。
 ```
-> python sim_swanptour.py
+> python sim_crystal.py
 ```
 
 すると以下のように使い方が表示されます。
@@ -100,16 +100,16 @@ sim_swanptour.py を以下のコマンドで実行します。
 ---- 使い方 ---------------------------------------
 3つのパラメータを指定して実行します
 
-> python sim_swanptour.py [agt_type] [task_type] [process_type]
+> python sim_crystal.py [agt_type] [task_type] [process_type]
 
 [agt_type]      : tableQ, netQ
-[task_type]     :silent_ruin, open_field, many_swamp
+[task_type]     : silent_ruin, open_field, four_crystals
 [process_type]  :learn/L, more/M, graph/G, anime/A
-例 > python sim_swanptour.py tableQ open_field L
+例 > python sim_crystal.py tableQ open_field L
 ---------------------------------------------------
 ```
 
-説明にあるように、python sim_swanptour.py の後に3つのパラメータをセットして使います。
+説明にあるように、python sim_crystal.py の後に3つのパラメータをセットして使います。
 
 最後に図解しますので、ここでは簡単に説明します。
 
@@ -119,90 +119,88 @@ sim_swanptour.py を以下のコマンドで実行します。
 + [task_type]　タスクのタイプ。全てのタスクにおいて全ての青いゴールに辿り着けばクリア
   + silent_ruin: マップ固定、ゴール数2
   + open_field: 壁なし、ゴール数1。ゴールの位置はランダムに変わる。
-  + many_swamp: 壁あり、ゴール数4。配置がランダムに変わる。
+  + four_crystals: 壁あり、ゴール数4。配置がランダムに変わる。
 + [process type] プロセスの種類
   + learn/L: 初めから学習する
   + more/M: 追加学習をする
   + graph/G: 学習曲線を表示する
   + anime/A: タスクを解いている様子をアニメーションで表示
 
-以下、<strong class="marker-yellow">netQ</strong> (ニューラルネットを使ったQ学習) に <strong class="marker-yellow">many_swamp</strong> のタスクを学習させる場合を説明します。
+以下、<strong class="marker-yellow">netQ</strong> (ニューラルネットを使ったQ学習) に <strong class="marker-yellow">four_crystals</strong> のタスクを学習させる場合を説明します。
 
 学習を開始するので、最後のパラメータは、<strong class="marker-yellow">more か L</strong>にします。
 
 ```
-(iRL)> python sim_swanptour.py netQ many_swamp L
+(iRL)> python sim_crystal.py netQ four_crystals L
 ```
 
 すると、以下のようにコンソールに学習過程の評価が表示され、全5000 stepの学習が行われます。
 ```
-netQ many_swamp  1000 --- 5 sec, eval_rwd -3.19, eval_steps  30.00
-netQ many_swamp  2000 --- 9 sec, eval_rwd -0.67, eval_steps  28.17
-netQ many_swamp  3000 --- 14 sec, eval_rwd -0.21, eval_steps  26.59
-netQ many_swamp  4000 --- 18 sec, eval_rwd -1.27, eval_steps  28.72
-netQ many_swamp  5000 --- 23 sec, eval_rwd -1.29, eval_steps  28.90
+netQ four_crystals  1000 --- 5 sec, eval_rwd -3.19, eval_steps  30.00
+netQ four_crystals  2000 --- 9 sec, eval_rwd -0.67, eval_steps  28.17
+netQ four_crystals  3000 --- 14 sec, eval_rwd -0.21, eval_steps  26.59
+netQ four_crystals  4000 --- 18 sec, eval_rwd -1.27, eval_steps  28.72
+netQ four_crystals  5000 --- 23 sec, eval_rwd -1.29, eval_steps  28.90
 ```
 
-1000回に1回、評価のプロセスがあり、そこで、eval_rwdとeval_stepが計算されます。eval_rwd は、その時の1エピソード中の平均報酬、eval_steps は平均step数です。評価は、行動選択のノイズは0にして行われます。
+1000回に1回、評価のプロセスがあり、そこで、eval_rwdとeval_stepが計算されます。eval_rwd は、その時の1エピソード中の平均報酬(reward/episode)、eval_steps は平均step数(steps/episode)です。評価は、行動選択のノイズは0にして行われます。
 
-eval_rwdやeval_step を指標として学習が目標値に進んだときにも学習は終了するようになっています（TARGET）。
+最後に以下のような学習過程のグラフ（reward/episode, steps/episode）が表示されます。赤い点線は目標値です。reward/episodeが赤い線に達し、steps/spisode１が赤い線まで下がると、学習がほぼ完了したことになります。今の段階では、学習は十分ではないことが分かります。
 
-最後に以下のような学習過程のグラフ（eval_rwd, eval_steps）が表示されます。
 [q]を押すとグラフが消え終了します。
 
-![](image/qnet_5000.png)
-
+![](image/qnet_5001.png)
 
 学習の結果後の<strong class="marker-yellow">動作アニメーションを見る</strong>には、最後のパラメータを<strong class="marker-yellow">anime か A</strong>にします。
 
 ```
-(iRL)> python sim_swanptour.py netQ many_swamp A
+(iRL)> python sim_crystal.py netQ four_crystals A
 ```
 すると、以下のようなアニメーションが表示されます。
-![](image/20201212_qnet_many_5000.gif)
+![](image/20210205_netQ_5000.gif)
 
 100エピソードが終わると終了します。[q]を押すと途中終了します。
 
-
-アニメーションを見ると、適切に動けていなことが分かります。まだ学習が足りないのです（アニメーションの中央から右側の白黒の図はエージェントへの入力を表しています）。
+アニメーションを見ると、予想通り、適切に動けていなことが分かります。まだ学習が足りないのです（アニメーションの中央から右側の白黒の図はエージェントへの入力を表しています）。
 
 そこで、<strong class="marker-yellow">追加学習</strong>します。最後のパラメータを<strong class="marker-yellow">more か M</strong>にして実行します（初めから学習する場合は L を使います）。
 
 ```
-(iRL)> python sim_swanptour.py netQ many_swamp M
+(iRL)> python sim_crystal.py netQ four_crystals M
 ```
 　
-このコマンドを数回繰り返します。TARGETが表示されて途中終了すると、学習が良いところまで進んだといえます。many_swampは、eval_rwd が1.4以上または、eval_steps が22以下になるとTARGETとなります。
+このコマンドを数回繰り返し、グラフが目標値付近に到達するまで続けます。
 
 ```
-netQ many_swamp  1000 --- 5 sec, eval_rwd  0.55, eval_steps  24.25
-netQ many_swamp  2000 --- 9 sec, eval_rwd  0.92, eval_steps  23.52
-netQ many_swamp  3000 --- 14 sec, eval_rwd  1.76, eval_steps  21.69
-TARGET_STEP 22 >= 21
+netQ four_crystals  1000 --- 4 sec, eval_rwd  0.75, eval_steps  24.45
+netQ four_crystals  2000 --- 9 sec, eval_rwd  0.92, eval_steps  23.90
+netQ four_crystals  3000 --- 14 sec, eval_rwd  1.38, eval_steps  22.24
+netQ four_crystals  4000 --- 19 sec, eval_rwd  1.60, eval_steps  21.54
+netQ four_crystals  5000 --- 23 sec, eval_rwd  1.76, eval_steps  21.03
 ```
 
-グラフが最後に表示されます。エピソード当たりの報酬(rwd)が増加し、ステップ数(Steps)が減少していることから、学習が進んでいたことが分かります。
+7回目のグラフです。エピソード当たりの報酬(rwd)が増加し、ステップ数(Steps)が減少していることから、学習が進んでいたことが分かります。
 
-![](image/qnet_30000.png)
+![](image/qnet_35000.png)
 
 アニメーションを見てみましょう。
 
 ```
-(iRL)> python sim_swanptour.py netQ many_swamp A
+(iRL)> python sim_crystal.py netQ four_crystals A
 ```
 
 たまに失敗しますが、だいたいうまくいっているようです。
 
-![](image/20201212_qnet_many_30000.gif)
+![](image/20210204_netQ_crystal.gif)
 
-今までに学習させた<strong class="marker-yellow">グラフを表示</strong>するには、最後のパラメータを<strong class="marker-yellow">graph か G</strong>にします。
+今までに学習させた<strong class="marker-yellow">グラフをもう一度表示</strong>するには、最後のパラメータを<strong class="marker-yellow">graph か G</strong>にします。
 
 ```
-(iRL)> python sim_swanptour.py netQ many_swamp G
+(iRL)> python sim_crystal.py netQ four_crystals G
 ```
 
 
-以上がsim_swamptour.py（池巡り）の使い方の説明です。
+以上がsim_crystal.py（池巡り）の使い方の説明です。
 
 # 強化学習アルゴリズムの種類
 
@@ -221,7 +219,7 @@ TARGET_STEP 22 >= 21
 
 
 # タスクの種類
-[task_type] で指定できるタスクは、silent_ruin, open_field, many_swamp, Tmaze_both, Tmaze_either, ruin_1swamp, ruin2swamp の7種類です。ここではその特徴を簡単に説明します。
+[task_type] で指定できるタスクは、silent_ruin, open_field, four_crystals, Tmaze_both, Tmaze_either, ruin_1swamp, ruin2swamp の7種類です。ここではその特徴を簡単に説明します。
 
 ## 全タスクで共通のルール
 
@@ -244,7 +242,7 @@ TARGET_STEP 22 >= 21
 
 ![](image/open_field.png)
 
-## many_swamp
+## four_crystals
 
 ゴールと壁の位置がエピソード毎にランダムに決まるために、観測のバリエーションが多く、qではメモリーオーバーとなってしまい学習ができません。netQ での学習が可能です。
 

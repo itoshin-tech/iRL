@@ -54,14 +54,17 @@ class Agt(core.coreAgt):
         self.max_memory=max_memory
         self.filepath = filepath
 
-        super().__init__()
-
         # 変数
         self.time = 0
         self.Q = {}
         self.len_Q = 0
 
+        super().__init__()
+
     def select_action(self, observation):
+        """
+        観測値observationに対して、行動actionを選ぶ
+        """
         obs = self._trans_code(observation)
 
         self._check_and_add_observation(obs)
@@ -73,6 +76,9 @@ class Agt(core.coreAgt):
         return action
 
     def get_Q(self, observation):
+        """
+        観測値observationに対するQ値を出力する
+        """
         obs = self._trans_code(observation)
         if obs in self.Q:
             val = self.Q[obs]
@@ -90,6 +96,9 @@ class Agt(core.coreAgt):
                 print('used memory for Q-table --- %d' % self.len_Q)
 
     def _trans_code(self, observation):
+        """
+        observationを文字列に変換する
+        """
         obs = str(observation)
         return obs
 
@@ -118,12 +127,18 @@ class Agt(core.coreAgt):
         self.Q[obs][action] -= self.alpha * (output - target)
 
     def save_weights(self, filepath=None):
+        """
+        学習をファイルに保存する
+        """
         if filepath is None:
             filepath = self.filepath
         with open(filepath, mode='wb') as f:
             pickle.dump(self.Q, f)
 
     def load_weights(self, filepath=None):
+        """
+        学習をファイルから読み込む
+        """
         if filepath is None:
             filepath = self.filepath
         with open(filepath, mode='rb') as f:

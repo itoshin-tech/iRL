@@ -11,10 +11,18 @@ import cv2
 import core
 import myutil
 
-PATH_ROBOT_NORMAL = 'rsc/robot_normal.png'
+"""
+PATH_ROBOT = [
+    'rsc/robo_back.png',
+    'rsc/robo_left.png',
+    'rsc/robo_flont.png',
+    'rsc/robo_right.png',
+]
+"""
+
 PATH_ROBOT_GOOD = 'rsc/robot_good.png'
 PATH_ROBOT_BAD = 'rsc/robot_bad.png'
-#PATH_CRYSTAL = 'rsc/crystal_small.png'
+# PATH_CRYSTAL = 'rsc/crystal_small.png'
 # PATH_CRYSTAL = 'rsc/crystal_big.png'
 PATH_CRYSTAL = 'rsc/crystal.png'
 PATH_WALL = 'rsc/wall.png'
@@ -354,6 +362,8 @@ class Env(core.coreEnv):
         """
         self.agt_state = 'move'  # render 用
         done = None
+
+        # 次の状態を求める
         if action == 0:
             # 前進
             pos = self.agt_pos + Env.dr[self.agt_dir]
@@ -492,6 +502,8 @@ class Env(core.coreEnv):
         unit = self.unit
         width = unit * self.field_size
         height = unit * self.field_size
+
+        # 画像用の変数準備
         img = np.zeros((height, width, 3), dtype=np.uint8)
 
         # ブロック各種の描画
@@ -534,19 +546,15 @@ class Env(core.coreEnv):
         """
         ロボットを描く
         """
+        # ロボット画像の選択
         if self.agt_state == 'hit_wall':
             img_robot = self.img_robot_bad.copy()
         elif self.agt_state == 'goal':
             img_robot = self.img_robot_good.copy()
         else:
             img_robot = self.img_robot_normal.copy()
-        
-        unit = self.unit
-        x0, y0 = np.array(self.agt_pos) * unit
-        x1 = x0 + unit
-        y1 = y0 + unit
 
-
+        # ロボット画像の回転
         if self.agt_dir == 1:
             # 左90度回転
             img_robot = cv2.rotate(img_robot, cv2.ROTATE_90_COUNTERCLOCKWISE)
@@ -557,7 +565,9 @@ class Env(core.coreEnv):
             # 右90度回転
             img_robot = cv2.rotate(img_robot, cv2.ROTATE_90_CLOCKWISE)
 
-        # ロボット画像の白の部分を背景で置き換える（透過処理）
+        # ロボット画像の貼り付け        
+        unit = self.unit
+        x0, y0 = np.array(self.agt_pos) * unit
         img = myutil.copy_img(img, img_robot, x0, y0, isTrans=True)
 
         return img
@@ -569,27 +579,32 @@ class Env(core.coreEnv):
         """
         unit = self.unit
         col_agt_obs = (50, 50, 255)
+        col_back = (159, 183, 207)
+        col_obj = (100, 50, 50)
 
+        # 画像の大きさを決めて画像用変数を作成
         observation = self._make_observation()
         obs_ih, obs_iw = observation.shape
         obs_unit = height / obs_ih  # 画像の縦の長さがフィールドと同じになるように obs_unitを決める
         obs_width = int(obs_unit * obs_iw)
         img_obs = np.zeros((height, obs_width, 3), dtype=np.uint8)
 
+        # 背景色で塗りつぶし
+        cv2.rectangle(
+            img_obs, (0, 0), (obs_width, height),
+            col_back, -1,
+        )
+
+        # 物体を描画
+        rate = 0.8  # 四角を小さくして隙間が見えるようにする、その割合
         for i_y in range(observation.shape[0]):
             for i_x in range(observation.shape[1]):
-                if observation[i_y, i_x] == 0:
-                    col = (0, 0, 0)
-                else:
-                    col = (200, 200, 200)
-                rate = 0.8  # 四角を小さくして隙間が見えるようにする
-                r0 = (int(obs_unit * i_x), int(obs_unit * i_y))
-                r1 = (int(r0[0] + obs_unit * rate),  int(r0[1] + obs_unit * rate))
-                cv2.rectangle(img_obs, r0, r1, col, -1)
+                if observation[i_y, i_x] > 0:
+                    r0 = (int(obs_unit * i_x), int(obs_unit * i_y))
+                    r1 = (int(r0[0] + obs_unit * rate),  int(r0[1] + obs_unit * rate))
+                    cv2.rectangle(img_obs, r0, r1, col_obj, -1)
 
         # 中心にマークを描画
-
-
         cy = int((obs_ih - 1) / 2)
         if obs_iw == obs_ih * 2:
             cxs = (cy, obs_ih + cy)
@@ -602,21 +617,7 @@ class Env(core.coreEnv):
             r1 = (int(r0[0] + obs_unit * rate),  int(r0[1] + obs_unit * rate))
             cv2.rectangle(img_obs, r0, r1, col, 2)
             
-            """
-            radius = int(obs_unit * 0.35)
-            r0 = (int(obs_unit * (cx + rate * 0.5)),
-                  int(obs_unit * (cy + rate * 0.5)))
-            cv2.circle(img_obs, r0, radius, col, 2)
-
-            # エージェントの方向の描画
-            radius = int(obs_unit * 0.2)
-            r1 = np.array(r0) + obs_unit * 0.25 * Env.dr[0, :]
-            r1 = r1.astype(int)
-            cv2.circle(img_obs, tuple(r1), radius, col, -1)
-            """
-        
         return img_obs
-
 
 def _show_obs(observation, action, reward, dones):
     """

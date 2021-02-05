@@ -83,21 +83,6 @@ class coreAgt():
         学習
         """
 
-    def reset(self):
-        """
-        内部状態をリセット(lstmやgruで使用)
-        """
-
-    def save_state(self):
-        """
-        内部状態をメモリーに保存(lstmやgruで使用)
-        """
-
-    def load_state(self):
-        """
-        内部状態の復元(lstmやgruで使用)
-        """
-
     def save_weights(self, filepath):
         """
         Qtableやweightパラメータの保存
