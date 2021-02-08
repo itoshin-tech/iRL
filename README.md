@@ -103,7 +103,7 @@ sim_crystal.py を以下のコマンドで実行します。
 > python sim_crystal.py [agt_type] [task_type] [process_type]
 
 [agt_type]      : tableQ, netQ
-[task_type]     : silent_ruin, open_field, four_crystals
+[task_type]     : fixed_field, open_field, four_crystals
 [process_type]  :learn/L, more/M, graph/G, anime/A
 例 > python sim_crystal.py tableQ open_field L
 ---------------------------------------------------
@@ -117,7 +117,7 @@ sim_crystal.py を以下のコマンドで実行します。
   + tableQ: Q学習
   + netQ: ニューラルネットを使ったQ学習
 + [task_type]　タスクのタイプ。全てのタスクにおいて全ての青いゴールに辿り着けばクリア
-  + silent_ruin: マップ固定、ゴール数2
+  + fixed_field: マップ固定、ゴール数2
   + open_field: 壁なし、ゴール数1。ゴールの位置はランダムに変わる。
   + four_crystals: 壁あり、ゴール数4。配置がランダムに変わる。
 + [process type] プロセスの種類
@@ -219,7 +219,7 @@ netQ four_crystals  5000 --- 23 sec, eval_rwd  1.76, eval_steps  21.03
 
 
 # タスクの種類
-[task_type] で指定できるタスクは、silent_ruin, open_field, four_crystals, Tmaze_both, Tmaze_either, ruin_1swamp, ruin2swamp の7種類です。ここではその特徴を簡単に説明します。
+[task_type] で指定できるタスクは、fixed_field, open_field, four_crystals, Tmaze_both, Tmaze_either, ruin_1swamp, ruin2swamp の7種類です。ここではその特徴を簡単に説明します。
 
 ## 全タスクで共通のルール
 

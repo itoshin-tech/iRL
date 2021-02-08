@@ -241,15 +241,15 @@ class Env(core.coreEnv):
         return img        
 
 
-def _show_obs(obs, act, rwd, done):
+def _show_obs(act, rwd, obs, done):
     """
     変数を表示
     """
     if act is not None:
-        print('%s act:%d, rwd:% .2f, done:%s' % (obs, act, rwd, done))
+        print('act:%d, rwd:% .2f, obs:%s, done:%s' % (act, rwd, obs, done))
     else:
-        print('start')
-        print('%s' % (obs))
+        print('')
+        print('first obs:%s' % (obs))
 
 
 if __name__ == '__main__':
@@ -262,7 +262,9 @@ if __name__ == '__main__':
             '[task type] を指定して実行します\n' + \
             '> python env_corridor.py [task_type]\n' + \
             '[task_type]\n' + \
-            '%s\n' % ', '.join([t.name for t in TaskType])
+            '%s\n' % ', '.join([t.name for t in TaskType]) + \
+            '---------------------------------------------------'
+
         print(MSG)
         sys.exit()
 
@@ -271,7 +273,7 @@ if __name__ == '__main__':
     if ttype is None:
         MSG = '\n' + \
             '[task type] が異なります。以下から選んで指定してください。\n' + \
-            '%s\n' % ', '.join([t.name for t in TaskType])
+            '%s' % ', '.join([t.name for t in TaskType])
         print(MSG)
         sys.exit()
 
@@ -279,18 +281,19 @@ if __name__ == '__main__':
     MSG = '\n' + \
         '---- 操作方法 -------------------------------------\n' + \
         '[f] 右に進む\n' + \
-        '[d] チャレンジ\n' + \
-        '池の位置でチャレンジを押すと成功\n' + \
+        '[d] 拾う\n' + \
+        '[q] 終了\n' + \
+        'クリスタルを拾うと成功\n' + \
         '---------------------------------------------------'
     print(MSG)
-    print('[task_type]: %s\n' % argvs[1])
+    print('[task_type]: %s' % argvs[1])
     is_process = False
     done = False
     obs = env.reset()
     act = None
     rwd = None
     done = False
-    _show_obs(obs, act, rwd, done)
+    _show_obs(act, rwd, obs, done)
     while True:
         image = env.render()
         cv2.imshow('env', image)
@@ -314,6 +317,6 @@ if __name__ == '__main__':
             else:
                 obs, rwd, done = env.step(act)
 
-            _show_obs(obs, act, rwd, done)
+            _show_obs(act, rwd, obs, done)
 
             is_process = False

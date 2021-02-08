@@ -76,7 +76,7 @@ else:
     sys.exit()
 
 # task_type paramter //////////
-if task_type == TaskType.silent_ruin:
+if task_type == TaskType.fixed_field:
     N_STEP = 5000
     EVAL_INTERVAL =200
     TARGET_STEP = 14

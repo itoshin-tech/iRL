@@ -29,7 +29,7 @@ class TaskType(Enum):
     """
     タスクタイプの列挙型
     """
-    silent_ruin = auto()
+    fixed_field = auto()
     open_field = auto()
     four_crystals = auto()
     # mytask = auto() # オリジナルタスクタイプを追加
@@ -54,6 +54,7 @@ class Env(core.coreEnv):
     ID_agt = 1
     ID_wall = 2
     ID_goal = 3
+
     # 方向
     dr = np.array([
             [0, -1],
@@ -149,7 +150,7 @@ class Env(core.coreEnv):
         """
         task_type を指定して、parameterを一括設定する
         """
-        if task_type == TaskType.silent_ruin:
+        if task_type == TaskType.fixed_field:
             self.field_size = 5
             self.sight_size = 2
             self.max_time = 25
@@ -437,17 +438,19 @@ class Env(core.coreEnv):
         現在の状態から、エージェントが受け取る入力情報を生成
         入力情報は自己を中心としたゴールと壁の位置
         """
-        # make around
+        # 周囲の壁を1で表す行列を生成
         around_wall = self._truefield.copy()
-        around_wall[np.where(around_wall != Env.ID_wall)] = 0
-        around_wall[around_wall > 0] = 1
-        around_goal = self._truefield.copy()
-        around_goal[around_goal != Env.ID_goal] = 0
+        around_wall[self._truefield == Env.ID_wall] = 1
+        around_wall[self._truefield != Env.ID_wall] = 0
 
-        # init field
+        # 周囲のクリスタルを1で表す行列を生成
+        around_goal = self._truefield.copy()
+        around_goal[self._truefield == Env.ID_goal] = 1
+        around_goal[self._truefield != Env.ID_goal] = 0
+
+        # goal 観測用、まずフィールドの3倍の大きさのobs_goalを作る
         f_s = self.field_size
         size = f_s * 3
-        # goal 観測用、まずフィールドの3倍の大きさのobs_goalを作る
         obs_goal = np.zeros((size, size), dtype=int)
 
         # agt_posを中心とした観測行列obs_goalを作成
@@ -607,16 +610,18 @@ class Env(core.coreEnv):
             
         return img_obs
 
-def _show_obs(observation, action, reward, dones):
+def _show_obs(act, rwd, obs, done):
     """
     変数を表示
     """
     if act is not None:
-        print(observation)
-        print('act:%d, rwd:% .2f, done:%s' % (action, reward, dones))
+        print('')
+        print('act:%d, rwd:% .2f, done:%s' % (act, rwd, done))
+        print(obs)
     else:
-        print('start')
-        print(observation)
+        print('')
+        print('first obs:')
+        print(obs)
 
 
 if __name__ == '__main__':
@@ -629,7 +634,9 @@ if __name__ == '__main__':
             '[task type] を指定して実行します\n' + \
             '> python env_crystal.py [task_type]\n' + \
             '[task_type]\n' + \
-            '%s\n' % ', '.join([t.name for t in TaskType])
+            '%s\n' % ', '.join([t.name for t in TaskType]) + \
+            '---------------------------------------------------'
+
         print(MSG)
         sys.exit()
 
@@ -655,7 +662,7 @@ if __name__ == '__main__':
     act = None
     rwd = None
     done = False
-    _show_obs(obs, act, rwd, done)
+    _show_obs(act, rwd, obs, done)
     while True:
         image = env.render()
         cv2.imshow('env', image)
@@ -683,6 +690,6 @@ if __name__ == '__main__':
             else:
                 obs, rwd, done = env.step(act)
 
-            _show_obs(obs, act, rwd, done)
+            _show_obs(act, rwd, obs, done)
 
             is_process = False
