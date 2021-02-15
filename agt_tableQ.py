@@ -61,33 +61,37 @@ class Agt(core.coreAgt):
 
         super().__init__()
 
-    def select_action(self, observation):
+    def select_action(self, obs):
         """
-        観測値observationに対して、行動actionを選ぶ
+        観測obsに対して、行動actionを選ぶ
         """
-        obs = self._trans_code(observation)
+        # (A) obsを文字列に変換
+        obs = str(obs)
 
+        # (B) next_obs がself.Qのキーになかったら追加する
         self._check_and_add_observation(obs)
 
-        if self.epsilon < np.random.rand():
-            action = np.argmax(self.Q[obs])
+        if np.random.rand() < self.epsilon:
+            # (C)  epsilon の確率でランダムに行動を選ぶ
+            act = np.random.randint(0, self.n_action)
         else:
-            action = np.random.randint(0, self.n_action)
-        return action
+            # (D) 1- epsilon の確率でQの値を最大とする行動を選ぶ
+            act = np.argmax(self.Q[obs])
+        return act
 
-    def get_Q(self, observation):
+    def get_Q(self, obs):
         """
-        観測値observationに対するQ値を出力する
+        観測observationに対するQ値を出力する
         """
-        obs = self._trans_code(observation)
+        obs = str(obs)
         if obs in self.Q:
             val = self.Q[obs]
             return np.array(val)
         return (None, ) * self.n_action
 
-    def _check_and_add_observation(self, observation):
-        if observation not in self.Q:
-            self.Q[observation] = [self.init_val_Q] * self.n_action
+    def _check_and_add_observation(self, obs):
+        if obs not in self.Q:
+            self.Q[obs] = [self.init_val_Q] * self.n_action
             self.len_Q += 1
             if self.len_Q > self.max_memory:
                 print('新規の観測数が上限 %d に達しました。' % self.max_memory)
@@ -95,36 +99,27 @@ class Agt(core.coreAgt):
             if (self.len_Q < 100 and self.len_Q % 10 == 0) or (self.len_Q % 100 == 0):
                 print('used memory for Q-table --- %d' % self.len_Q)
 
-    def _trans_code(self, observation):
+    
+    def learn(self, obs, act, rwd, next_obs, next_done):
         """
-        observationを文字列に変換する
+        学習する
         """
-        obs = str(observation)
-        return obs
+        # (A) obs, next_obs を文字列に変換
+        obs = str(obs)
+        next_obs = str(next_obs)
 
-    def learn(self, observation, action, reward, next_observation, done):
-        """
-        学習
-        Q(obs, act)
-            <- (1-alpha) Q(obs, act)
-                + alpha ( rwd + gammma * max_a Q(next_obs))
-
-        input : (obs, act)
-        output: Q(obs, act)
-        target: rwd * gamma * max_a Q(next_obs, a)
-        """
-        obs = self._trans_code(observation)
-        next_obs = self._trans_code(next_observation)
-
+        # (B) next_obsがself.Qのキーになかったら追加する
         self._check_and_add_observation(next_obs)
 
-        output = self.Q[obs][action]
-        if done is False:
-            target = reward + self.gamma * max(self.Q[next_obs])
+        # (C) 学習のtargetを作成
+        if next_done is False:
+            target = rwd + self.gamma * max(self.Q[next_obs])
         else:
-            target = reward
+            target = rwd
 
-        self.Q[obs][action] -= self.alpha * (output - target)
+        # (D) Qをtargetに近づける
+        self.Q[obs][act] = (1-self.alpha) * self.Q[obs][act] + \
+                           self.alpha * target
 
     def save_weights(self, filepath=None):
         """

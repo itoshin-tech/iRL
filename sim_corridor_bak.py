@@ -1,30 +1,30 @@
 """
-sim_crystal.py
-クリスタルタスクの実行ファイル
+sim_corridor.py
+廊下タスクの実行ファイル
 """
 import os
 import sys
 import copy
 
 # 自作モジュール
-import env_crystal as envnow
-from env_crystal import TaskType
+import env_corridor as envnow
+from env_corridor import TaskType
 import trainer
 import myutil
 
 SAVE_DIR = 'agt_data'
-ENV_NAME = 'env_crystal'
+ENV_NAME = 'env_corridor'
 
 argvs = sys.argv
 if len(argvs) < 4:
     MSG = '\n' + \
         '---- 使い方 ---------------------------------------\n' + \
         '3つのパラメータを指定して実行します\n\n' + \
-        '> python sim_crystal.py [agt_type] [task_type] [process_type]\n\n' + \
+        '> python sim_corridor.py [agt_type] [task_type] [process_type]\n\n' + \
         '[agt_type]\t: tableQ, netQ\n' + \
         '[task_type]\t: %s\n' % ', '.join([t.name for t in TaskType]) + \
         '[process_type]\t:learn/L, more/M, graph/G, anime/A\n' + \
-        '例 > python sim_crystal.py tableQ open_field L\n' + \
+        '例 > python sim_corridor.py tableQ L4c23 L\n' + \
         '---------------------------------------------------'
     print(MSG)
     sys.exit()
@@ -76,43 +76,36 @@ else:
     sys.exit()
 
 # task_type paramter //////////
-if task_type == TaskType.fixed_field:
+if task_type == TaskType.L4c23:
     N_STEP = 5000
-    EVAL_INTERVAL =200
-    TARGET_STEP = 14
-    TARGET_REWARD = 0.8
+    EVAL_INTERVAL =100
+    TARGET_REWARD = 2.5
+    TARGET_STEP = 3.5
     AGT_EPSILON = 0.4
     AGT_ANIME_EPSILON = 0.0
 
-elif task_type == TaskType.open_field:
+elif task_type == TaskType.L5c1to4:
     N_STEP = 5000
-    EVAL_INTERVAL =200
-    TARGET_STEP = 4
-    TARGET_REWARD = 0.75
-    AGT_EPSILON = 0.2
-    AGT_ANIME_EPSILON = 0.0
-
-elif task_type == TaskType.four_crystals:
-    N_STEP = 5000
-    EVAL_INTERVAL =1000
-    TARGET_STEP = 22
-    TARGET_REWARD = 1.4
+    EVAL_INTERVAL =100
+    TARGET_REWARD = 2.5
+    TARGET_STEP = 3.5
     AGT_EPSILON = 0.4
     AGT_ANIME_EPSILON = 0.0
+
     """
 elif task_type == TaskType.mytask:  # mytaskのパラメータ追加
     N_STEP = 5000
-    EVAL_INTERVAL =1000
+    EVAL_INTERVAL =200
     TARGET_STEP = None
-    TARGET_REWARD = None
+    TARGET_REWARD = 1
     AGT_EPSILON = 0.4
     AGT_ANIME_EPSILON = 0.0
     """
 else:
     N_STEP = 5000
-    EVAL_INTERVAL =1000
+    EVAL_INTERVAL =200
     TARGET_STEP = None
-    TARGET_REWARD = None
+    TARGET_REWARD = 1
     AGT_EPSILON = 0.4
     AGT_ANIME_EPSILON = 0.0
     print('シミュレーションにデフォルトパラメータを設定しました。')
@@ -129,7 +122,7 @@ eval_env.set_task_type(task_type)
 # agent prameter  //////////
 # agt common
 agt_prm = {
-    'gamma': 0.9,
+    'gamma': 1.0,
     'epsilon': AGT_EPSILON,
     'input_size': obs.shape,
     'n_action': env.n_action,
@@ -148,7 +141,7 @@ elif agt_type == 'netQ':
     agt_prm['n_dense2'] = None  # 数値にすると1層追加
 
 else:
-    ValueError('agt_type が間違っています')
+    raise ValueError('agt_type が間違っています')
 
 # simulation pramter //////////
 sim_prm = {
@@ -174,8 +167,42 @@ sim_anime_prm = {
     'eval_N_EPISODE': -1,
 }
 
-# trainer paramter //////////
+# trainer paramter ///////////////
+obss = None
+if task_type is TaskType.L4c23:
+    obss = [
+        [
+            [1, 0, 3, 0],
+            [0, 1, 3, 0],
+            [0, 0, 1, 0],
+            [0, 0, 3, 1],
+        ],
+        [
+            [1, 0, 0, 3],
+            [0, 1, 0, 3],
+            [0, 0, 1, 3],
+            [0, 0, 0, 1],
+        ],
+    ]
+elif task_type is TaskType.L5c1to4:
+    obss = [
+        [
+            [1, 0, 0, 3, 0],
+            [0, 1, 0, 3, 0],
+            [0, 0, 1, 3, 0],
+            [0, 0, 0, 1, 0],
+        ],
+        [
+            [1, 0, 0, 0, 3],
+            [0, 1, 0, 0, 3],
+            [0, 0, 1, 0, 3],
+            [0, 0, 0, 1, 3],
+            [0, 0, 0, 0, 1],
+        ],
+    ]
+
 trn_prm = {
+    'obss': obss,
     'show_header': '%s %s ' % (agt_type, task_type.name),
 }
 
@@ -224,4 +251,5 @@ if IS_SHOW_GRAPH is True:
         agt_prm['filepath'],
         target_reward=TARGET_REWARD,
         target_step=TARGET_STEP,
-        )
+    )
+

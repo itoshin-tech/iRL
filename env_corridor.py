@@ -20,8 +20,8 @@ class TaskType(Enum):
     """
     タスクタイプの列挙型
     """
-    L4g23 = auto()
-    L5g1to4 = auto()
+    L4c23 = auto()
+    L5c1to4 = auto()
     # mytask = auto() # オリジナルタスクタイプを追加
 
     @classmethod
@@ -43,7 +43,7 @@ class Env(core.coreEnv):
     # 内部表現のID
     ID_brank = 0
     ID_agt = 1
-    ID_goal = 3  # env_crystal.py と合わせて3にしている
+    ID_goal = 3  # env_field.py と合わせて3にしている
 
     def __init__(
             self,
@@ -103,21 +103,21 @@ class Env(core.coreEnv):
         """
         task_type を指定して、parameterを一括設定する
         """
-        if task_type == TaskType.L4g23:
+        if task_type == TaskType.L4c23:
             self.field_length = 4
             self.goal_candidate = (2, 3)
             self.pos_start = 0
-            self.reward_fail = 0
-            self.reward_move = 0
-            self.reward_goal = 1
+            self.reward_fail = -1
+            self.reward_move = -1
+            self.reward_goal = 5
 
-        elif task_type == TaskType.L5g1to4:
+        elif task_type == TaskType.L5c1to4:
             self.field_length = 5
             self.goal_candidate = (1, 2, 3, 4)
             self.pos_start = 0
-            self.reward_fail = 0
-            self.reward_move = 0
-            self.reward_goal = 1
+            self.reward_fail = -2
+            self.reward_move = -1
+            self.reward_goal = 5
 
             """
         elif task_type == TaskType.mytask:  # オリジナルタスクタイプ追加

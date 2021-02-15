@@ -90,9 +90,9 @@ iRLを展開したフォルダーに入ります。
 (iRL)> cd C:\[解凍したディレクトリ]\iRL-main\  
 ```
 
-sim_crystal.py を以下のコマンドで実行します。
+sim_field.py を以下のコマンドで実行します。
 ```
-> python sim_crystal.py
+> python sim_field.py
 ```
 
 すると以下のように使い方が表示されます。
@@ -100,16 +100,16 @@ sim_crystal.py を以下のコマンドで実行します。
 ---- 使い方 ---------------------------------------
 3つのパラメータを指定して実行します
 
-> python sim_crystal.py [agt_type] [task_type] [process_type]
+> python sim_field.py [agt_type] [task_type] [process_type]
 
 [agt_type]      : tableQ, netQ
 [task_type]     : fixed_field, open_field, four_crystals
 [process_type]  :learn/L, more/M, graph/G, anime/A
-例 > python sim_crystal.py tableQ open_field L
+例 > python sim_field.py tableQ open_field L
 ---------------------------------------------------
 ```
 
-説明にあるように、python sim_crystal.py の後に3つのパラメータをセットして使います。
+説明にあるように、python sim_field.py の後に3つのパラメータをセットして使います。
 
 最後に図解しますので、ここでは簡単に説明します。
 
@@ -131,7 +131,7 @@ sim_crystal.py を以下のコマンドで実行します。
 学習を開始するので、最後のパラメータは、<strong class="marker-yellow">more か L</strong>にします。
 
 ```
-(iRL)> python sim_crystal.py netQ four_crystals L
+(iRL)> python sim_field.py netQ four_crystals L
 ```
 
 すると、以下のようにコンソールに学習過程の評価が表示され、全5000 stepの学習が行われます。
@@ -154,7 +154,7 @@ netQ four_crystals  5000 --- 23 sec, eval_rwd -1.29, eval_steps  28.90
 学習の結果後の<strong class="marker-yellow">動作アニメーションを見る</strong>には、最後のパラメータを<strong class="marker-yellow">anime か A</strong>にします。
 
 ```
-(iRL)> python sim_crystal.py netQ four_crystals A
+(iRL)> python sim_field.py netQ four_crystals A
 ```
 すると、以下のようなアニメーションが表示されます。
 ![](image/20210205_netQ_5000.gif)
@@ -166,7 +166,7 @@ netQ four_crystals  5000 --- 23 sec, eval_rwd -1.29, eval_steps  28.90
 そこで、<strong class="marker-yellow">追加学習</strong>します。最後のパラメータを<strong class="marker-yellow">more か M</strong>にして実行します（初めから学習する場合は L を使います）。
 
 ```
-(iRL)> python sim_crystal.py netQ four_crystals M
+(iRL)> python sim_field.py netQ four_crystals M
 ```
 　
 このコマンドを数回繰り返し、グラフが目標値付近に到達するまで続けます。
@@ -186,7 +186,7 @@ netQ four_crystals  5000 --- 23 sec, eval_rwd  1.76, eval_steps  21.03
 アニメーションを見てみましょう。
 
 ```
-(iRL)> python sim_crystal.py netQ four_crystals A
+(iRL)> python sim_field.py netQ four_crystals A
 ```
 
 たまに失敗しますが、だいたいうまくいっているようです。
@@ -196,11 +196,11 @@ netQ four_crystals  5000 --- 23 sec, eval_rwd  1.76, eval_steps  21.03
 今までに学習させた<strong class="marker-yellow">グラフをもう一度表示</strong>するには、最後のパラメータを<strong class="marker-yellow">graph か G</strong>にします。
 
 ```
-(iRL)> python sim_crystal.py netQ four_crystals G
+(iRL)> python sim_field.py netQ four_crystals G
 ```
 
 
-以上がsim_crystal.py（池巡り）の使い方の説明です。
+以上がsim_field.py（池巡り）の使い方の説明です。
 
 # 強化学習アルゴリズムの種類
 

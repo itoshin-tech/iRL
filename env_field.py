@@ -1,5 +1,5 @@
 """
-env_crystal.py
+env_field.py
 クリスタルタスクの環境
 """
 import sys
@@ -212,20 +212,23 @@ class Env(core.coreEnv):
 
         elif self.maze_type == 'fixed_maze01':
             """
-            ' ': brank
-            'g': goal
+            '-': brank
+            'g': goal (crystal)
             'w': wall
             """
 
+            # 以下の部分で、fiexed_field の迷路を変えることができます
             maze = [
-                'wwg  ',
-                ' w  w',
-                ' g  w',
-                'www  ',
-                'w    ',
+                '--ww-',
+                '-----',
+                '-w--g',
+                '-wgww',
+                'ww--w',
                 ]
+            # ゴール（クリスタルの数）
             self.n_goal = 2
-            self._my_maze(maze, start_pos=(4, 4), start_dir=0)
+            # スタート地点と方向の指定
+            self._my_maze(maze, start_pos=(0, 1), start_dir=0)
 
         else:
             raise ValueError('maze_type が間違っています')
@@ -238,8 +241,8 @@ class Env(core.coreEnv):
         """
         文字で表した迷路を行列に変換
 
-        ' ': brank
-        'g': goal
+        '-': brank
+        'g': goal(crystal)
         'w': wall
         """
         myfield = []
@@ -249,7 +252,7 @@ class Env(core.coreEnv):
             for i in mline:
                 if i == 'w':
                     id_val = Env.ID_wall
-                elif i == ' ':
+                elif i == '-':
                     id_val = Env.ID_brank
                 elif i == 'g':
                     id_val = Env.ID_goal
@@ -632,7 +635,7 @@ if __name__ == '__main__':
         MSG = '\n' + \
             '---- 操作方法 -------------------------------------\n' + \
             '[task type] を指定して実行します\n' + \
-            '> python env_crystal.py [task_type]\n' + \
+            '> python env_field.py [task_type]\n' + \
             '[task_type]\n' + \
             '%s\n' % ', '.join([t.name for t in TaskType]) + \
             '---------------------------------------------------'

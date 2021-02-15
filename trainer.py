@@ -91,23 +91,24 @@ class Trainer:
         done = False
         self.on_simulation = True
 
-        # シミュレーション開始
+        # シミュレーションのループ開始
         while self.on_simulation:
             if done is False:
-                # 通常のステップ
+                # agtが行動を選ぶ
                 act = self.agt.select_action(obs)
                 next_obs, rwd, next_done = self.env.step(act)
 
-                # 学習
+                # agtが学習する
                 if IS_LEARN is True:
                     self.agt.learn(obs, act, rwd, next_obs, next_done)
 
             else:
-                # 最終状態でのステップ
+                # 最終状態になったら、envを初期化する
                 next_obs = self.env.reset()
                 rwd = None
                 next_done = False
 
+            # next_obs, next_done を次の学習のために保持
             obs = next_obs
             done = next_done
 
@@ -143,7 +144,7 @@ class Trainer:
                 # 途中経過表示
                 ptime = time.time() - stime
                 if eval_rwds_in_episode is not None:
-                    print('%s %d --- %d sec, eval_rwd % .2f, eval_steps % .2f' % (
+                    print('%s %d steps, %d sec --- eval_rwd % .2f, eval_steps % .2f' % (
                             self.show_header,
                             timestep, ptime,
                             eval_rwds_in_episode,
@@ -235,7 +236,7 @@ class Trainer:
             for obs in obss:
                 val = self.agt.get_Q(np.array(obs))
                 if val[0] is not None:
-                    valstr = [' %.2f' % v for v in val]
+                    valstr = [' % .2f' % v for v in val]
                     print('Obs:%s  Q:%s' % (str(np.array(obs)), ','.join(valstr)))
             print('')
 

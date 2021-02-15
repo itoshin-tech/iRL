@@ -55,7 +55,7 @@ def show_graph(pathname, target_reward=None, target_step=None):
     eval_step = hist['eval_steps'].tolist()
     eval_x = hist['eval_x'].tolist()
 
-    plt.figure(figsize=(10,5))
+    plt.figure(figsize=(8,4))
     plt.subplots_adjust(hspace=0.6)
 
     # reward / episode
