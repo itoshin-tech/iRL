@@ -50,66 +50,29 @@ if process_type in ('learn', 'L'):
     IS_LEARN = True
     IS_SHOW_GRAPH = True
     IS_SHOW_ANIME = False
-    ANIME_N_EPISODE = 0
 elif process_type in ('more', 'M'):
     IS_LOAD_DATA = True
     IS_LEARN = True
     IS_SHOW_GRAPH = True
     IS_SHOW_ANIME = False
-    ANIME_N_EPISODE = 0
 elif process_type in ('graph', 'G'):
     IS_LOAD_DATA = False
     IS_LEARN = False
     IS_SHOW_GRAPH = True
     IS_SHOW_ANIME = False
-    ANIME_N_EPISODE = 0
     print('グラフ表示を終了するには[q]を押します。')
 elif process_type in ('anime', 'A'):
     IS_LOAD_DATA = True
     IS_LEARN = False
     IS_SHOW_GRAPH = False
     IS_SHOW_ANIME = True
-    ANIME_N_EPISODE = 100
     print('アニメーションを途中で止めるには[q]を押します。')
 else:
     print('process type が間違っています。')
     sys.exit()
 
-# task_type paramter //////////
-if task_type == TaskType.L4c23:
-    N_STEP = 5000
-    EVAL_INTERVAL =100
-    TARGET_REWARD = 2.5
-    TARGET_STEP = 3.5
-    AGT_EPSILON = 0.4
-    AGT_ANIME_EPSILON = 0.0
 
-elif task_type == TaskType.L5c1to4:
-    N_STEP = 5000
-    EVAL_INTERVAL =100
-    TARGET_REWARD = 2.5
-    TARGET_STEP = 3.5
-    AGT_EPSILON = 0.4
-    AGT_ANIME_EPSILON = 0.0
-
-    """
-elif task_type == TaskType.mytask:  # mytaskのパラメータ追加
-    N_STEP = 5000
-    EVAL_INTERVAL =200
-    TARGET_STEP = None
-    TARGET_REWARD = 1
-    AGT_EPSILON = 0.4
-    AGT_ANIME_EPSILON = 0.0
-    """
-else:
-    N_STEP = 5000
-    EVAL_INTERVAL =200
-    TARGET_STEP = None
-    TARGET_REWARD = 1
-    AGT_EPSILON = 0.4
-    AGT_ANIME_EPSILON = 0.0
-    print('シミュレーションにデフォルトパラメータを設定しました。')
-
+# Envインスタンス生成 //////////
 # 学習用環境
 env = envnow.Env()
 env.set_task_type(task_type)
@@ -119,11 +82,10 @@ obs = env.reset()
 eval_env = envnow.Env()
 eval_env.set_task_type(task_type)
 
-# agent prameter  //////////
-# agt common
+# Agt 共通パラメータ //////////
 agt_prm = {
     'gamma': 1.0,
-    'epsilon': AGT_EPSILON,
+    'epsilon': 0.4,
     'input_size': obs.shape,
     'n_action': env.n_action,
     'filepath': SAVE_DIR + '/sim_' + \
@@ -132,44 +94,39 @@ agt_prm = {
                 task_type.name
 }
 
-if agt_type == 'tableQ':
-    agt_prm['init_val_Q'] = 0
-    agt_prm['alpha'] = 0.1
-
-elif agt_type == 'netQ':
-    agt_prm['n_dense'] = 64
-    agt_prm['n_dense2'] = None  # 数値にすると1層追加
-
-else:
-    raise ValueError('agt_type が間違っています')
-
-# simulation pramter //////////
+# Trainer シミュレーション共通パラメータ //////////
 sim_prm = {
-    'N_STEP': N_STEP,
+    'N_STEP': 5000,
     'N_EPISODE': -1,
-    'EVAL_INTERVAL': EVAL_INTERVAL,
-    'IS_LEARN': IS_LEARN,
+    'IS_EVAL': True,
+    'IS_LEARN': True,
     'IS_ANIMATION': False,
-    'SHOW_DELAY': 0.5,
-    'eval_N_STEP': -1,
-    'eval_N_EPISODE': 100,
-    'eval_EPSILON': 0.0,
+    'EVAL_INTERVAL': 200,
+    'EVAL_N_STEP': -1,
+    'EVAL_N_EPISODE': 100,
+    'EVAL_EPSILON': 0.0,
 }
-
-# animation pramter //////////
+# Trainer アニメーション共通パラメータ //////////
 sim_anime_prm = {
     'N_STEP': -1,
-    'N_EPISODE': ANIME_N_EPISODE,
+    'N_EPISODE': 100,
+    'IS_EVAL': False,
     'IS_LEARN': False,
     'IS_ANIMATION': True,
-    'SHOW_DELAY': 0.2,
-    'eval_N_STEP': -1,
-    'eval_N_EPISODE': -1,
+    'ANIME_DELAY': 0.2,
 }
+ANIME_EPSILON = 0.0
 
-# trainer paramter ///////////////
-obss = None
-if task_type is TaskType.L4c23:
+# グラフ表示共通パラメータ //////////
+graph_prm = {}
+
+# task_type 別のパラメータ //////////
+if task_type == TaskType.L4c23:
+    sim_prm['N_STEP'] = 5000
+    sim_prm['EVAL_INTERVAL'] = 100
+    agt_prm['epsilon'] = 0.4
+    graph_prm['target_reward'] = 2.5
+    graph_prm['target_step'] = 3.5
     obss = [
         [
             [1, 0, 3, 0],
@@ -184,7 +141,15 @@ if task_type is TaskType.L4c23:
             [0, 0, 0, 1],
         ],
     ]
-elif task_type is TaskType.L5c1to4:
+    sim_prm['obss'] = obss
+
+
+elif task_type == TaskType.L5c14:
+    sim_prm['N_STEP'] = 5000
+    sim_prm['EVAL_INTERVAL'] = 100
+    agt_prm['epsilon'] = 0.4
+    graph_prm['target_reward'] = 2.5
+    graph_prm['target_step'] = 3.5
     obss = [
         [
             [1, 0, 0, 3, 0],
@@ -200,11 +165,18 @@ elif task_type is TaskType.L5c1to4:
             [0, 0, 0, 0, 1],
         ],
     ]
+    sim_prm['obss'] = obss
 
-trn_prm = {
-    'obss': obss,
-    'show_header': '%s %s ' % (agt_type, task_type.name),
-}
+
+# agt_type 別のパラメータ //////////
+if agt_type == 'tableQ':
+    agt_prm['init_val_Q'] = 0
+    agt_prm['alpha'] = 0.1
+
+elif agt_type == 'netQ':
+    agt_prm['n_dense'] = 64
+    agt_prm['n_dense2'] = None  # 数値にすると1層追加
+
 
 # メイン //////////
 if (IS_LOAD_DATA is True) or \
@@ -223,7 +195,7 @@ if (IS_LOAD_DATA is True) or \
     agt.build_model()
 
     # trainer インスタンス作成
-    trn = trainer.Trainer(agt, env, eval_env, **trn_prm)
+    trn = trainer.Trainer(agt, env, eval_env)
 
     if IS_LOAD_DATA is True:
         # エージェントのデータロード
@@ -242,14 +214,11 @@ if (IS_LOAD_DATA is True) or \
 
     # アニメーション
     if IS_SHOW_ANIME is True:
-        agt.epsilon = AGT_ANIME_EPSILON
+        agt.epsilon = ANIME_EPSILON
         trn.simulate(**sim_anime_prm)
 
 if IS_SHOW_GRAPH is True:
     # グラフ表示
-    myutil.show_graph(
-        agt_prm['filepath'],
-        target_reward=TARGET_REWARD,
-        target_step=TARGET_STEP,
-    )
+    myutil.show_graph(agt_prm['filepath'], **graph_prm)
+
 

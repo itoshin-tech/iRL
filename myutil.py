@@ -67,7 +67,7 @@ def show_graph(pathname, target_reward=None, target_step=None):
             [target_reward, target_reward],
             'r:')
 
-    plt.title('reward / episode')
+    plt.title('rewards / episode')
     plt.grid(True)
 
     # steps / episode

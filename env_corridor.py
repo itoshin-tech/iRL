@@ -21,7 +21,7 @@ class TaskType(Enum):
     タスクタイプの列挙型
     """
     L4c23 = auto()
-    L5c1to4 = auto()
+    L5c14 = auto()
     # mytask = auto() # オリジナルタスクタイプを追加
 
     @classmethod
@@ -111,11 +111,11 @@ class Env(core.coreEnv):
             self.reward_move = -1
             self.reward_goal = 5
 
-        elif task_type == TaskType.L5c1to4:
+        elif task_type == TaskType.L5c14:
             self.field_length = 5
             self.goal_candidate = (1, 2, 3, 4)
             self.pos_start = 0
-            self.reward_fail = -2
+            self.reward_fail = -1
             self.reward_move = -1
             self.reward_goal = 5
 

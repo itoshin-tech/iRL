@@ -143,6 +143,29 @@ elif agt_type == 'netQ':
 else:
     raise ValueError('agt_type が間違っています')
 
+# simulation pramter //////////
+sim_prm = {
+    'N_STEP': N_STEP,
+    'N_EPISODE': -1,
+    'EVAL_INTERVAL': EVAL_INTERVAL,
+    'IS_LEARN': IS_LEARN,
+    'IS_ANIMATION': False,
+    'SHOW_DELAY': 0.5,
+    'eval_N_STEP': -1,
+    'eval_N_EPISODE': 100,
+    'eval_EPSILON': 0.0,
+}
+
+# animation pramter //////////
+sim_anime_prm = {
+    'N_STEP': -1,
+    'N_EPISODE': ANIME_N_EPISODE,
+    'IS_LEARN': False,
+    'IS_ANIMATION': True,
+    'SHOW_DELAY': 0.2,
+    'eval_N_STEP': -1,
+    'eval_N_EPISODE': -1,
+}
 
 # trainer paramter ///////////////
 obss = None
@@ -178,33 +201,10 @@ elif task_type is TaskType.L5c14:
         ],
     ]
 
-# simulation pramter //////////
-sim_prm = {
-    'N_STEP': N_STEP,
-    'N_EPISODE': -1,
-    'EVAL_INTERVAL': EVAL_INTERVAL,
-    'IS_LEARN': IS_LEARN,
-    'IS_ANIMATION': False,
-    'SHOW_DELAY': 0.5,
-    'eval_N_STEP': -1,
-    'eval_N_EPISODE': 100,
-    'eval_EPSILON': 0.0,
+trn_prm = {
     'obss': obss,
     'show_header': '%s %s ' % (agt_type, task_type.name),
 }
-
-# animation pramter //////////
-sim_anime_prm = {
-    'N_STEP': -1,
-    'N_EPISODE': ANIME_N_EPISODE,
-    'IS_LEARN': False,
-    'IS_ANIMATION': True,
-    'SHOW_DELAY': 0.2,
-    'eval_N_STEP': -1,
-    'eval_N_EPISODE': -1,
-    'show_header': '%s %s ' % (agt_type, task_type.name),
-}
-
 
 # メイン //////////
 if (IS_LOAD_DATA is True) or \
@@ -242,7 +242,7 @@ if (IS_LOAD_DATA is True) or \
 
     # アニメーション
     if IS_SHOW_ANIME is True:
-        #agt.epsilon = AGT_ANIME_EPSILON
+        agt.epsilon = AGT_ANIME_EPSILON
         trn.simulate(**sim_anime_prm)
 
 if IS_SHOW_GRAPH is True:
