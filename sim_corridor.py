@@ -4,7 +4,6 @@ sim_corridor.py
 """
 import os
 import sys
-import copy
 
 # 自作モジュール
 import env_corridor as envnow
@@ -71,7 +70,6 @@ else:
     print('process type が間違っています。')
     sys.exit()
 
-
 # Envインスタンス生成 //////////
 # 学習用環境
 env = envnow.Env()
@@ -84,8 +82,6 @@ eval_env.set_task_type(task_type)
 
 # Agt 共通パラメータ //////////
 agt_prm = {
-    'gamma': 1.0,
-    'epsilon': 0.4,
     'input_size': obs.shape,
     'n_action': env.n_action,
     'filepath': SAVE_DIR + '/sim_' + \
@@ -96,23 +92,23 @@ agt_prm = {
 
 # Trainer シミュレーション共通パラメータ //////////
 sim_prm = {
-    'N_STEP': 5000,
-    'N_EPISODE': -1,
-    'IS_EVAL': True,
+    'n_step': 5000,
+    'n_episode': -1,
+    'is_eval': True,
     'IS_LEARN': True,
-    'IS_ANIMATION': False,
-    'EVAL_INTERVAL': 200,
-    'EVAL_N_STEP': -1,
-    'EVAL_N_EPISODE': 100,
-    'EVAL_EPSILON': 0.0,
+    'is_animation': False,
+    'eval_interval': 200,
+    'eval_n_step': -1,
+    'eval_n_episode': 100,
+    'eval_epsilon': 0.0,
 }
 # Trainer アニメーション共通パラメータ //////////
 sim_anime_prm = {
-    'N_STEP': -1,
-    'N_EPISODE': 100,
-    'IS_EVAL': False,
+    'n_step': -1,
+    'n_episode': 100,
+    'is_eval': False,
     'IS_LEARN': False,
-    'IS_ANIMATION': True,
+    'is_animation': True,
     'ANIME_DELAY': 0.2,
 }
 ANIME_EPSILON = 0.0
@@ -122,9 +118,10 @@ graph_prm = {}
 
 # task_type 別のパラメータ //////////
 if task_type == TaskType.L4c23:
-    sim_prm['N_STEP'] = 5000
-    sim_prm['EVAL_INTERVAL'] = 100
+    sim_prm['n_step'] = 5000
+    sim_prm['eval_interval'] = 100
     agt_prm['epsilon'] = 0.4
+    agt_prm['gamma'] = 1.0
     graph_prm['target_reward'] = 2.5
     graph_prm['target_step'] = 3.5
     obss = [
@@ -143,11 +140,11 @@ if task_type == TaskType.L4c23:
     ]
     sim_prm['obss'] = obss
 
-
 elif task_type == TaskType.L5c14:
-    sim_prm['N_STEP'] = 5000
-    sim_prm['EVAL_INTERVAL'] = 100
+    sim_prm['n_step'] = 5000
+    sim_prm['eval_interval'] = 100
     agt_prm['epsilon'] = 0.4
+    agt_prm['gamma'] = 1.0
     graph_prm['target_reward'] = 2.5
     graph_prm['target_step'] = 3.5
     obss = [
@@ -167,7 +164,6 @@ elif task_type == TaskType.L5c14:
     ]
     sim_prm['obss'] = obss
 
-
 # agt_type 別のパラメータ //////////
 if agt_type == 'tableQ':
     agt_prm['init_val_Q'] = 0
@@ -175,17 +171,16 @@ if agt_type == 'tableQ':
 
 elif agt_type == 'netQ':
     agt_prm['n_dense'] = 64
-    agt_prm['n_dense2'] = None  # 数値にすると1層追加
-
+    agt_prm['n_dense2'] = None  # 数値にするとその素子数で1層追加
 
 # メイン //////////
 if (IS_LOAD_DATA is True) or \
     (IS_LEARN is True) or \
-    (sim_prm['IS_ANIMATION'] is True):
+    (sim_prm['is_animation'] is True):
 
     # エージェントをインポートしてインスタンス作成
     if agt_type == 'tableQ':
-        from agt_tableQ import Agt  # pylint:disable=unused-import
+        from agt_tableQ import Agt
     elif agt_type == 'netQ':
         from agt_netQ import Agt
     else:
@@ -202,23 +197,22 @@ if (IS_LOAD_DATA is True) or \
         try:
             agt.load_weights()
             trn.load_history(agt.filepath)
-        except Exception:
+        except Exception as e:
+            print(e)
             print('エージェントのパラメータがロードできません')
             sys.exit()
 
-    # 学習
     if IS_LEARN is True:
+        # 学習
         trn.simulate(**sim_prm)
         agt.save_weights()
         trn.save_history(agt.filepath)
 
-    # アニメーション
     if IS_SHOW_ANIME is True:
+        # アニメーション
         agt.epsilon = ANIME_EPSILON
         trn.simulate(**sim_anime_prm)
 
 if IS_SHOW_GRAPH is True:
     # グラフ表示
     myutil.show_graph(agt_prm['filepath'], **graph_prm)
-
-

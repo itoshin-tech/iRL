@@ -50,26 +50,26 @@ if process_type in ('learn', 'L'):
     IS_LEARN = True
     IS_SHOW_GRAPH = True
     IS_SHOW_ANIME = False
-    ANIME_N_EPISODE = 0
+    anime_n_episode = 0
 elif process_type in ('more', 'M'):
     IS_LOAD_DATA = True
     IS_LEARN = True
     IS_SHOW_GRAPH = True
     IS_SHOW_ANIME = False
-    ANIME_N_EPISODE = 0
+    anime_n_episode = 0
 elif process_type in ('graph', 'G'):
     IS_LOAD_DATA = False
     IS_LEARN = False
     IS_SHOW_GRAPH = True
     IS_SHOW_ANIME = False
-    ANIME_N_EPISODE = 0
+    anime_n_episode = 0
     print('グラフ表示を終了するには[q]を押します。')
 elif process_type in ('anime', 'A'):
     IS_LOAD_DATA = True
     IS_LEARN = False
     IS_SHOW_GRAPH = False
     IS_SHOW_ANIME = True
-    ANIME_N_EPISODE = 100
+    anime_n_episode = 100
     print('アニメーションを途中で止めるには[q]を押します。')
 else:
     print('process type が間違っています。')
@@ -77,40 +77,40 @@ else:
 
 # task_type paramter //////////
 if task_type == TaskType.fixed_field:
-    N_STEP = 5000
-    EVAL_INTERVAL =200
+    n_step = 5000
+    eval_interval =200
     TARGET_STEP = 12
     TARGET_REWARD = 1
     AGT_EPSILON = 0.4
     AGT_ANIME_EPSILON = 0.0
 
 elif task_type == TaskType.open_field:
-    N_STEP = 5000
-    EVAL_INTERVAL =200
+    n_step = 5000
+    eval_interval =200
     TARGET_STEP = 4
     TARGET_REWARD = 0.75
     AGT_EPSILON = 0.2
     AGT_ANIME_EPSILON = 0.0
 
 elif task_type == TaskType.four_crystals:
-    N_STEP = 5000
-    EVAL_INTERVAL =1000
+    n_step = 5000
+    eval_interval =1000
     TARGET_STEP = 22
     TARGET_REWARD = 1.4
     AGT_EPSILON = 0.4
     AGT_ANIME_EPSILON = 0.0
     """
 elif task_type == TaskType.mytask:  # mytaskのパラメータ追加
-    N_STEP = 5000
-    EVAL_INTERVAL =1000
+    n_step = 5000
+    eval_interval =1000
     TARGET_STEP = None
     TARGET_REWARD = None
     AGT_EPSILON = 0.4
     AGT_ANIME_EPSILON = 0.0
     """
 else:
-    N_STEP = 5000
-    EVAL_INTERVAL =1000
+    n_step = 5000
+    eval_interval =1000
     TARGET_STEP = None
     TARGET_REWARD = None
     AGT_EPSILON = 0.4
@@ -152,26 +152,26 @@ else:
 
 # simulation pramter //////////
 sim_prm = {
-    'N_STEP': N_STEP,
-    'N_EPISODE': -1,
-    'EVAL_INTERVAL': EVAL_INTERVAL,
+    'n_step': n_step,
+    'n_episode': -1,
+    'eval_interval': eval_interval,
     'IS_LEARN': IS_LEARN,
-    'IS_ANIMATION': False,
+    'is_animation': False,
     'SHOW_DELAY': 0.5,
-    'eval_N_STEP': -1,
-    'eval_N_EPISODE': 100,
+    'eval_n_step': -1,
+    'eval_n_episode': 100,
     'eval_EPSILON': 0.0,
 }
 
 # animation pramter //////////
 sim_anime_prm = {
-    'N_STEP': -1,
-    'N_EPISODE': ANIME_N_EPISODE,
+    'n_step': -1,
+    'n_episode': anime_n_episode,
     'IS_LEARN': False,
-    'IS_ANIMATION': True,
+    'is_animation': True,
     'SHOW_DELAY': 0.2,
-    'eval_N_STEP': -1,
-    'eval_N_EPISODE': -1,
+    'eval_n_step': -1,
+    'eval_n_episode': -1,
 }
 
 # trainer paramter //////////
@@ -182,7 +182,7 @@ trn_prm = {
 # メイン //////////
 if (IS_LOAD_DATA is True) or \
     (IS_LEARN is True) or \
-    (sim_prm['IS_ANIMATION'] is True):
+    (sim_prm['is_animation'] is True):
 
     # エージェントをインポートしてインスタンス作成
     if agt_type == 'tableQ':
@@ -203,7 +203,8 @@ if (IS_LOAD_DATA is True) or \
         try:
             agt.load_weights()
             trn.load_history(agt.filepath)
-        except Exception:
+        except Exception as e:
+            print(e)
             print('エージェントのパラメータがロードできません')
             sys.exit()
 
