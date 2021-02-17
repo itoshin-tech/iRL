@@ -4,6 +4,7 @@ sim_field.py
 """
 import os
 import sys
+import copy
 
 # 自作モジュール
 import env_field as envnow
@@ -49,28 +50,73 @@ if process_type in ('learn', 'L'):
     IS_LEARN = True
     IS_SHOW_GRAPH = True
     IS_SHOW_ANIME = False
+    anime_n_episode = 0
 elif process_type in ('more', 'M'):
     IS_LOAD_DATA = True
     IS_LEARN = True
     IS_SHOW_GRAPH = True
     IS_SHOW_ANIME = False
+    anime_n_episode = 0
 elif process_type in ('graph', 'G'):
     IS_LOAD_DATA = False
     IS_LEARN = False
     IS_SHOW_GRAPH = True
     IS_SHOW_ANIME = False
+    anime_n_episode = 0
     print('グラフ表示を終了するには[q]を押します。')
 elif process_type in ('anime', 'A'):
     IS_LOAD_DATA = True
     IS_LEARN = False
     IS_SHOW_GRAPH = False
     IS_SHOW_ANIME = True
+    anime_n_episode = 100
     print('アニメーションを途中で止めるには[q]を押します。')
 else:
     print('process type が間違っています。')
     sys.exit()
 
-# Envインスタンス生成 //////////
+# task_type paramter //////////
+if task_type == TaskType.fixed_field:
+    n_step = 5000
+    eval_interval =200
+    TARGET_STEP = 12
+    TARGET_REWARD = 1
+    AGT_EPSILON = 0.4
+    AGT_ANIME_EPSILON = 0.0
+
+elif task_type == TaskType.open_field:
+    n_step = 5000
+    eval_interval =200
+    TARGET_STEP = 4
+    TARGET_REWARD = 0.75
+    AGT_EPSILON = 0.2
+    AGT_ANIME_EPSILON = 0.0
+
+elif task_type == TaskType.four_crystals:
+    n_step = 5000
+    eval_interval =1000
+    TARGET_STEP = 22
+    TARGET_REWARD = 1.4
+    AGT_EPSILON = 0.4
+    AGT_ANIME_EPSILON = 0.0
+    """
+elif task_type == TaskType.mytask:  # mytaskのパラメータ追加
+    n_step = 5000
+    eval_interval =1000
+    TARGET_STEP = None
+    TARGET_REWARD = None
+    AGT_EPSILON = 0.4
+    AGT_ANIME_EPSILON = 0.0
+    """
+else:
+    n_step = 5000
+    eval_interval =1000
+    TARGET_STEP = None
+    TARGET_REWARD = None
+    AGT_EPSILON = 0.4
+    AGT_ANIME_EPSILON = 0.0
+    print('シミュレーションにデフォルトパラメータを設定しました。')
+
 # 学習用環境
 env = envnow.Env()
 env.set_task_type(task_type)
@@ -80,8 +126,11 @@ obs = env.reset()
 eval_env = envnow.Env()
 eval_env.set_task_type(task_type)
 
-# Agt 共通パラメータ //////////
+# agent prameter  //////////
+# agt common
 agt_prm = {
+    'gamma': 0.9,
+    'epsilon': AGT_EPSILON,
     'input_size': obs.shape,
     'n_action': env.n_action,
     'filepath': SAVE_DIR + '/sim_' + \
@@ -90,64 +139,45 @@ agt_prm = {
                 task_type.name
 }
 
-# Trainer シミュレーション共通パラメータ //////////
-sim_prm = {
-    'n_episode': -1,
-    'is_eval': True,
-    'is_learn': True,
-    'is_animation': False,
-    'eval_n_step': -1,
-    'eval_n_episode': 100,
-    'eval_epsilon': 0.0,
-}
-
-# Trainer アニメーション共通パラメータ //////////
-sim_anime_prm = {
-    'n_step': -1,
-    'n_episode': 100,
-    'is_eval': False,
-    'is_learn': False,
-    'is_animation': True,
-    'anime_delay': 0.2,
-}
-ANIME_EPSILON = 0.0
-
-# グラフ表示共通パラメータ //////////
-graph_prm = {}
-
-# task_type 別のパラメータ //////////
-if task_type == TaskType.fixed_field:
-    sim_prm['n_step'] = 5000
-    sim_prm['eval_interval'] = 200
-    agt_prm['epsilon'] = 0.4
-    agt_prm['gamma'] = 0.9
-    graph_prm['target_reward'] = 1.0
-    graph_prm['target_step'] = 12.0
-
-elif task_type == TaskType.open_field:
-    sim_prm['n_step'] = 5000
-    sim_prm['eval_interval'] = 200
-    agt_prm['epsilon'] = 0.2
-    agt_prm['gamma'] = 0.9
-    graph_prm['target_reward']= 0.75
-    graph_prm['target_step'] = 4.0
-
-elif task_type == TaskType.four_crystals:
-    sim_prm['n_step'] = 5000
-    sim_prm['eval_interval'] = 1000
-    agt_prm['epsilon'] = 0.4
-    agt_prm['gamma'] = 0.9
-    graph_prm['target_reward']= 1.4
-    graph_prm['target_step'] = 22.0
-
-# agt_type 別のパラメータ //////////
 if agt_type == 'tableQ':
     agt_prm['init_val_Q'] = 0
     agt_prm['alpha'] = 0.1
 
 elif agt_type == 'netQ':
     agt_prm['n_dense'] = 64
-    agt_prm['n_dense2'] = None  # 数値にするとその素子数の2層目を追加
+    agt_prm['n_dense2'] = None  # 数値にすると1層追加
+
+else:
+    ValueError('agt_type が間違っています')
+
+# simulation pramter //////////
+sim_prm = {
+    'n_step': n_step,
+    'n_episode': -1,
+    'eval_interval': eval_interval,
+    'IS_LEARN': IS_LEARN,
+    'is_animation': False,
+    'SHOW_DELAY': 0.5,
+    'eval_n_step': -1,
+    'eval_n_episode': 100,
+    'eval_EPSILON': 0.0,
+}
+
+# animation pramter //////////
+sim_anime_prm = {
+    'n_step': -1,
+    'n_episode': anime_n_episode,
+    'IS_LEARN': False,
+    'is_animation': True,
+    'SHOW_DELAY': 0.2,
+    'eval_n_step': -1,
+    'eval_n_episode': -1,
+}
+
+# trainer paramter //////////
+trn_prm = {
+    'show_header': '%s %s ' % (agt_type, task_type.name),
+}
 
 # メイン //////////
 if (IS_LOAD_DATA is True) or \
@@ -156,7 +186,7 @@ if (IS_LOAD_DATA is True) or \
 
     # エージェントをインポートしてインスタンス作成
     if agt_type == 'tableQ':
-        from agt_tableQ import Agt
+        from agt_tableQ import Agt  # pylint:disable=unused-import
     elif agt_type == 'netQ':
         from agt_netQ import Agt
     else:
@@ -166,7 +196,7 @@ if (IS_LOAD_DATA is True) or \
     agt.build_model()
 
     # trainer インスタンス作成
-    trn = trainer.Trainer(agt, env, eval_env)
+    trn = trainer.Trainer(agt, env, eval_env, **trn_prm)
 
     if IS_LOAD_DATA is True:
         # エージェントのデータロード
@@ -178,17 +208,21 @@ if (IS_LOAD_DATA is True) or \
             print('エージェントのパラメータがロードできません')
             sys.exit()
 
+    # 学習
     if IS_LEARN is True:
-        # 学習
         trn.simulate(**sim_prm)
         agt.save_weights()
         trn.save_history(agt.filepath)
 
+    # アニメーション
     if IS_SHOW_ANIME is True:
-        # アニメーション
-        agt.epsilon = ANIME_EPSILON
+        agt.epsilon = AGT_ANIME_EPSILON
         trn.simulate(**sim_anime_prm)
 
 if IS_SHOW_GRAPH is True:
     # グラフ表示
-    myutil.show_graph(agt_prm['filepath'], **graph_prm)
+    myutil.show_graph(
+        agt_prm['filepath'],
+        target_reward=TARGET_REWARD,
+        target_step=TARGET_STEP,
+        )

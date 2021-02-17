@@ -45,13 +45,13 @@ class Trainer:
         n_step=1000,
         n_episode=-1,
         is_eval=True,
-        IS_LEARN=True,
+        is_learn=True,
         is_animation=False,
         eval_interval=100,
         eval_n_step=-1,
         eval_n_episode=-1,
         eval_epsilon=0.0,
-        ANIME_DELAY=0.5,
+        anime_delay=0.5,
         obss=None,
         show_header=''
         ):
@@ -67,7 +67,7 @@ class Trainer:
             -1にするとステップ数が採用される
         is_eval: bool
             True: 評価をする
-        IS_LEARN: bool
+        is_learn: bool
             True: 学習をする
         is_animation: bool
             True: アニメーションを見せる
@@ -79,7 +79,7 @@ class Trainer:
             評価用パラメータ：評価に行うエピソード数
         eval_EPSILON: int
             評価用パラメータ：評価で設定するAgtの乱雑度
-        ANIME_DELAY: int
+        anime_delay: int
             アニメーションをする際のディレイ(ms)
         obss: list of numpy.ndarray
             Q値をチェックする観測リスト
@@ -107,7 +107,7 @@ class Trainer:
                 next_obs, rwd, next_done = self.env.step(act)
 
                 # agtが学習する
-                if IS_LEARN is True:
+                if is_learn is True:
                     self.agt.learn(obs, act, rwd, next_obs, next_done)
 
             else:
@@ -124,7 +124,7 @@ class Trainer:
             if is_animation:
                 img = self.env.render()
                 cv2.imshow('trainer', img)
-                key = cv2.waitKey(int(ANIME_DELAY * 1000))
+                key = cv2.waitKey(int(anime_delay * 1000))
                 if key == ord('q'):
                     self.off_simulation()
                     break

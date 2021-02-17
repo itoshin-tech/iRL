@@ -92,24 +92,23 @@ agt_prm = {
 
 # Trainer シミュレーション共通パラメータ //////////
 sim_prm = {
-    'n_step': 5000,
     'n_episode': -1,
     'is_eval': True,
-    'IS_LEARN': True,
+    'is_learn': True,
     'is_animation': False,
-    'eval_interval': 200,
     'eval_n_step': -1,
     'eval_n_episode': 100,
     'eval_epsilon': 0.0,
 }
+
 # Trainer アニメーション共通パラメータ //////////
 sim_anime_prm = {
     'n_step': -1,
     'n_episode': 100,
     'is_eval': False,
-    'IS_LEARN': False,
+    'is_learn': False,
     'is_animation': True,
-    'ANIME_DELAY': 0.2,
+    'anime_delay': 0.2,
 }
 ANIME_EPSILON = 0.0
 
@@ -144,7 +143,7 @@ elif task_type == TaskType.L5c14:
     sim_prm['n_step'] = 5000
     sim_prm['eval_interval'] = 100
     agt_prm['epsilon'] = 0.4
-    agt_prm['gamma'] = 1.0
+    
     graph_prm['target_reward'] = 2.5
     graph_prm['target_step'] = 3.5
     obss = [
@@ -171,7 +170,7 @@ if agt_type == 'tableQ':
 
 elif agt_type == 'netQ':
     agt_prm['n_dense'] = 64
-    agt_prm['n_dense2'] = None  # 数値にするとその素子数で1層追加
+    agt_prm['n_dense2'] = None  # 数値にするとその素子数の2層目を追加
 
 # メイン //////////
 if (IS_LOAD_DATA is True) or \
