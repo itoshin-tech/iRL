@@ -76,7 +76,7 @@ else:
     sys.exit()
 
 # task_type paramter //////////
-if task_type == TaskType.fixed_field:
+if task_type == TaskType.fixed_cave:
     n_step = 5000
     eval_interval =200
     TARGET_STEP = 12

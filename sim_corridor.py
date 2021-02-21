@@ -170,7 +170,6 @@ if agt_type == 'tableQ':
 
 elif agt_type == 'netQ':
     agt_prm['n_dense'] = 64
-    agt_prm['n_dense2'] = None  # 数値にするとその素子数の2層目を追加
 
 # メイン //////////
 if (IS_LOAD_DATA is True) or \

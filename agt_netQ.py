@@ -13,12 +13,11 @@ class Agt(core.coreAgt):
     """
     def __init__(
         self,
-        n_action=2,
-        input_size=(7, ),
+        n_action=2,  # 行動の種類の数（ネットワークの出力数）
+        input_size=(7, ),　# 入力サイズ
+        n_dense=64,  # 中間層のユニット数
         epsilon=0.1,
         gamma=0.9,
-        n_dense=32,
-        n_dense2=None,
         filepath=None,
     ):
         """
@@ -44,10 +43,9 @@ class Agt(core.coreAgt):
         # パラメータ
         self.n_action = n_action
         self.input_size = input_size
+        self.n_dense = n_dense
         self.epsilon = epsilon
         self.gamma = gamma
-        self.n_dense = n_dense
-        self.n_dense2 = n_dense2
         self.filepath = filepath
 
         # 変数
@@ -60,16 +58,22 @@ class Agt(core.coreAgt):
         """
         指定したパラメータでモデルを構築する
         """
+        # (A) 入力層
         inputs = tf.keras.Input(shape=(self.input_size))
+
+        # (B) 入力層を1次元に展開する
         x = tf.keras.layers.Flatten()(inputs)
-        x = tf.keras.layers.Dense(self.n_dense, activation='relu')(x)
 
-        if self.n_dense2 is not None:
-            x = tf.keras.layers.Dense(self.n_dense2, activation='relu')(x)
+        # (C) 中間層を定義。活性化関数はreluに指定
+        x = tf.keras.layers.Dense(self.n_dense, activation='relu')(x) # (C)
 
-        outputs = tf.keras.layers.Dense(self.n_action, activation='linear')(x)
-        self.model = tf.keras.Model(inputs=inputs, outputs=outputs)
+        # (D) 出力層を定義。活性化関数はlinear（線形）に指定
+        outputs = tf.keras.layers.Dense(self.n_action, activation='linear')(x) # (D)
 
+        # (E) ニューラルネットワークモデルのインスタンス生成
+        self.model = tf.keras.Model(inputs=inputs, outputs=outputs) # (E)
+
+        # (F) 勾配法のパラメータの定義
         self.model.compile(
             optimizer='adam',
             loss='mean_squared_error',
@@ -106,13 +110,6 @@ class Agt(core.coreAgt):
     def learn(self, observation, action, reward, next_observation, done):
         """
         学習
-        Q(obs, act)
-            <- (1-alpha) Q(obs, act)
-                + alpha ( rwd + gammma * max_a Q(next_obs))
-
-        input : (obs, act)
-        output: Q(obs, act)
-        target: rwd * gamma * max_a Q(next_obs, a)
         """
         obs = self._trans_code(observation)
         next_obs = self._trans_code(next_observation)

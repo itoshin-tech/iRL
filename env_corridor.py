@@ -43,7 +43,7 @@ class Env(core.coreEnv):
     # 内部表現のID
     ID_brank = 0
     ID_agt = 1
-    ID_goal = 3  # env_field.py と合わせて3にしている
+    ID_goal = 2
 
     def __init__(
             self,

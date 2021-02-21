@@ -29,8 +29,8 @@ class TaskType(Enum):
     """
     タスクタイプの列挙型
     """
-    fixed_field = auto()
     open_field = auto()
+    fixed_cave = auto()
     four_crystals = auto()
     # mytask = auto() # オリジナルタスクタイプを追加
 
@@ -150,20 +150,7 @@ class Env(core.coreEnv):
         """
         task_type を指定して、parameterを一括設定する
         """
-        if task_type == TaskType.fixed_field:
-            self.field_size = 5
-            self.sight_size = 2
-            self.max_time = 25
-            self.n_wall = None
-            self.n_goal = None
-            self.start_pos = None
-            self.reward_hit_wall = -0.2
-            self.reward_move = -0.1
-            self.reward_goal = 1
-            self.maze_type = 'fixed_maze01'
-            self.wall_observable = True
-
-        elif task_type == TaskType.open_field:
+        if task_type == TaskType.open_field:
             self.field_size = 5
             self.sight_size = 4
             self.max_time = 15
@@ -175,6 +162,19 @@ class Env(core.coreEnv):
             self.reward_goal = 1
             self.maze_type = 'random'
             self.wall_observable = False
+
+        elif task_type == TaskType.fixed_cave:
+            self.field_size = 5
+            self.sight_size = 2
+            self.max_time = 25
+            self.n_wall = None
+            self.n_goal = None
+            self.start_pos = None
+            self.reward_hit_wall = -0.2
+            self.reward_move = -0.1
+            self.reward_goal = 1
+            self.maze_type = 'fixed_maze01'
+            self.wall_observable = True
 
         elif task_type == TaskType.four_crystals:
             self.field_size = 7
@@ -656,7 +656,7 @@ if __name__ == '__main__':
     MSG =  '---- 操作方法 -------------------------------------\n' + \
            '[e] 前に進む [s] 左に90度回る [f] 右に90度回る\n' + \
            '[q] 終了\n' + \
-           '全ての池に訪れるとクリア、次のエピソードが開始\n' + \
+           '全てのクリスタルを回収するとクリア、次のエピソードが開始\n' + \
            '---------------------------------------------------'
     print(MSG)
     print('[task_type]: %s\n' % argvs[1])

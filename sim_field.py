@@ -116,7 +116,7 @@ ANIME_EPSILON = 0.0
 graph_prm = {}
 
 # task_type 別のパラメータ //////////
-if task_type == TaskType.fixed_field:
+if task_type == TaskType.fixed_cave:
     sim_prm['n_step'] = 5000
     sim_prm['eval_interval'] = 200
     agt_prm['epsilon'] = 0.4
@@ -134,9 +134,10 @@ elif task_type == TaskType.open_field:
 
 elif task_type == TaskType.four_crystals:
     sim_prm['n_step'] = 5000
-    sim_prm['eval_interval'] = 1000
-    agt_prm['epsilon'] = 0.4
-    agt_prm['gamma'] = 0.9
+    sim_prm['eval_interval']
+     = 1000
+    agt_prm['epsilon'] = 0.q4
+    agt_prm['gamma'] = 0.9q
     graph_prm['target_reward']= 1.4
     graph_prm['target_step'] = 22.0
 
@@ -147,7 +148,6 @@ if agt_type == 'tableQ':
 
 elif agt_type == 'netQ':
     agt_prm['n_dense'] = 64
-    agt_prm['n_dense2'] = None  # 数値にするとその素子数の2層目を追加
 
 # メイン //////////
 if (IS_LOAD_DATA is True) or \
