@@ -134,10 +134,9 @@ elif task_type == TaskType.open_field:
 
 elif task_type == TaskType.four_crystals:
     sim_prm['n_step'] = 5000
-    sim_prm['eval_interval']
-     = 1000
-    agt_prm['epsilon'] = 0.q4
-    agt_prm['gamma'] = 0.9q
+    sim_prm['eval_interval'] = 1000
+    agt_prm['epsilon'] = 0.4
+    agt_prm['gamma'] = 0.9
     graph_prm['target_reward']= 1.4
     graph_prm['target_step'] = 22.0
 

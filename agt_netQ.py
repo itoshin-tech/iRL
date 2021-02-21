@@ -14,7 +14,7 @@ class Agt(core.coreAgt):
     def __init__(
         self,
         n_action=2,  # 行動の種類の数（ネットワークの出力数）
-        input_size=(7, ),　# 入力サイズ
+        input_size=(7, ),  # 入力サイズ
         n_dense=64,  # 中間層のユニット数
         epsilon=0.1,
         gamma=0.9,
@@ -93,36 +93,28 @@ class Agt(core.coreAgt):
             action = np.random.randint(0, self.n_action)
         return action
 
-    def get_Q(self, observation):
+    def get_Q(self, obs):
         """
         観測値observationに対するQ値を出力する
         """
-        obs = self._trans_code(observation)
         Q = self.model.predict(obs.reshape((1,) + self.input_size))[0]
         return Q
 
-    def _trans_code(self, observation):
-        """
-        observationを変換する場合にはこの関数内を記述
-        """
-        return observation
-
-    def learn(self, observation, action, reward, next_observation, done):
+    def learn(self, obs, act, rwd, next_obs, done):
         """
         学習
         """
-        obs = self._trans_code(observation)
-        next_obs = self._trans_code(next_observation)
         Q = self.model.predict(obs.reshape((1,) + self.input_size))
+        target = Q.copy()
 
         if done is False:
             next_Q = self.model.predict(next_obs.reshape((1,) + self.input_size))[0]
-            target = reward + self.gamma * max(next_Q)
+            target_act = rwd + self.gamma * max(next_Q)
         else:
-            target = reward
+            target_act = rwd
 
-        Q[0][action] = target
-        self.model.fit(obs.reshape((1,) + self.input_size), Q, verbose=0, epochs=1)
+        target[0][act] = target_act
+        self.model.fit(obs.reshape((1,) + self.input_size), target, verbose=0, epochs=1)
 
     def save_weights(self, filepath=None):
         """
