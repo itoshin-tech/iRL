@@ -128,6 +128,8 @@ class Trainer:
                 if key == ord('q'):
                     self.off_simulation()
                     break
+                if key == ord('o'):
+                    self.env.obs_in_render = bool(1 - self.env.obs_in_render)
 
             # 一定のステップ数で記録と評価と表示を行う
             if is_eval is True:

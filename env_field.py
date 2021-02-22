@@ -72,11 +72,13 @@ class Env(core.coreEnv):
             n_goal=2,
             start_pos=(3, 3),
             start_dir=0,
-            reward_hit_wall = -0.2,
-            reward_move = -0.1,
-            reward_goal = 1.0,
+            reward_hit_wall=-0.2,
+            reward_move=-0.1,
+            reward_goal=1.0,
             maze_type='random',
             wall_observable=True,
+            obs_in_render=True,
+            sight_in_render=True,
         ):
         """
         Parameters
@@ -105,7 +107,11 @@ class Env(core.coreEnv):
             迷路タイプ
             'random', 'fixed_maze01'
         wall_observable: bool
-            壁が観察できる
+            壁を観測に入れる
+        obs_in_render: bool
+            renderの出力にobsを入れる
+        sight_in_render: bool
+            renderでsight外を暗くする
         """
         self.field_size = field_size
         self.sight_size = sight_size
@@ -119,6 +125,8 @@ class Env(core.coreEnv):
         self.reward_goal = reward_goal
         self.maze_type = maze_type
         self.wall_observable = wall_observable
+        self.obs_in_render = obs_in_render
+        self.sight_in_render = sight_in_render
 
         super().__init__()
 
@@ -506,43 +514,59 @@ class Env(core.coreEnv):
         height = unit * self.field_size
 
         # 画像用の変数準備
-        img = np.zeros((height, width, 3), dtype=np.uint8)
+        img_out = np.zeros((height, width, 3), dtype=np.uint8)
 
         # ブロック各種の描画
         for i_x in range(self.field_size):
             for i_y in range(self.field_size):
-                # col = None
+                # ブロックの描画開始座標
                 r0 = (unit * i_x, unit * i_y)
+
                 if self._truefield[i_y, i_x] == Env.ID_wall:
                     # 壁
-                    myutil.copy_img(img, self.img_wall, r0[0], r0[1])
+                    myutil.copy_img(img_out, self.img_wall, r0[0], r0[1])
                 else:
                     # ブランク
-                    myutil.copy_img(img, self.img_brank, r0[0], r0[1])
+                    myutil.copy_img(img_out, self.img_brank, r0[0], r0[1])
 
                 if self._truefield[i_y, i_x] == Env.ID_goal:
                     # ゴール
-                    myutil.copy_img(img, self.img_crystal, r0[0], r0[1], isTrans=True)
-                    # col = col_goal
+                    myutil.copy_img(img_out, self.img_crystal, r0[0], r0[1], isTrans=True)
 
         # ロボットの描画
-        self._draw_robot(img)
+        self._draw_robot(img_out)
 
-        # 観測値の描画
-        img_obs = self._draw_observation(unit, height)
+        if self.sight_in_render is True:
+            # 観測範囲の外側を暗くする
+            img_out = self._draw_sight_effect(img_out)
 
-        # 画像の統合
-        mgn_w = 10  # フィールドと観測値の境界線の太さ
-        mgn_col = (200, 200, 0)
-        img_mgn = np.zeros((height, mgn_w, 3), dtype=np.uint8)
-        cv2.rectangle(
-            img_mgn,
-            (0, 0), (mgn_w, height), mgn_col, -1)
+        if self.obs_in_render is True:
+            # 観測の描画
+            img_obs = self._draw_observation(unit, height)
 
-        img_out = cv2.hconcat([img, img_mgn, img_obs])
+            # 画像の統合
+            mgn_w = 10  # フィールドと観測値の境界線の太さ
+            mgn_col = (200, 200, 0)
+            img_mgn = np.zeros((height, mgn_w, 3), dtype=np.uint8)
+            cv2.rectangle(
+                img_mgn,
+                (0, 0), (mgn_w, height), mgn_col, -1)
+
+            img_out = cv2.hconcat([img_out, img_mgn, img_obs])
+
 
         return img_out
 
+    def _draw_sight_effect(self, img):
+        img_mask = np.zeros(img.shape[:2], dtype=np.uint8)
+        unit = self.unit
+        ss = self.sight_size
+        x0, y0 = (np.array(self.agt_pos) - np.array([ss, ss]))* unit
+        x1, y1 = (np.array(self.agt_pos) + np.array([ss, ss]))* unit + unit
+        img_mask = cv2.rectangle(img_mask, (x0, y0), (x1, y1), 255, -1)
+        idx = img_mask == 0
+        img[idx] = img[idx] * 0.5
+        return img
 
     def _draw_robot(self, img):
         """
@@ -655,6 +679,8 @@ if __name__ == '__main__':
     env.set_task_type(ttype)
     MSG =  '---- 操作方法 -------------------------------------\n' + \
            '[e] 前に進む [s] 左に90度回る [f] 右に90度回る\n' + \
+           '[o] 観測の表示のON/OFF\n' + \
+           '[v] 視野の表示のON/OFF\n' + \
            '[q] 終了\n' + \
            '全てのクリスタルを回収するとクリア、次のエピソードが開始\n' + \
            '---------------------------------------------------'
@@ -683,6 +709,12 @@ if __name__ == '__main__':
         if key == ord('s'):
             act = 1
             is_process = True
+
+        if key == ord('o'):
+            env.obs_in_render = bool(1 - env.obs_in_render)
+
+        if key == ord('v'):
+            env.sight_in_render = bool(1 - env.sight_in_render)
 
         if is_process is True:
             if done is True:

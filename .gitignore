@@ -1,4 +1,5 @@
 /agt_data/*
 test*.py
 /rsc/bak*/
+/agt_backup/*
 *.pyc
