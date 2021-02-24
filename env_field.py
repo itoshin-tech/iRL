@@ -29,9 +29,9 @@ class TaskType(Enum):
     """
     タスクタイプの列挙型
     """
-    open_field = auto()
-    fixed_cave = auto()
-    four_crystals = auto()
+    no_wall = auto()
+    fixed_wall = auto()
+    random_wall = auto()
     # mytask = auto() # オリジナルタスクタイプを追加
 
     @classmethod
@@ -63,56 +63,25 @@ class Env(core.coreEnv):
             [1, 0],
         ]) 
   
-    def __init__(  # pylint:disable=too-many-arguments, too-many-locals
+    def __init__(
             self,
-            field_size=5,
-            sight_size=3,
-            max_time=30,
-            n_wall=1,
-            n_goal=2,
-            start_pos=(3, 3),
-            start_dir=0,
-            reward_hit_wall=-0.2,
-            reward_move=-0.1,
-            reward_goal=1.0,
-            maze_type='random',
-            wall_observable=True,
-            obs_in_render=True,
-            sight_in_render=True,
+            field_size=5,           # int: フィールドの1辺の長さ
+            sight_size=3,           # int: 視野の長さ
+            max_time=30,            # int: タイムリミット
+            n_wall=1,               # int: 壁の数（maze_type='random'用）
+            n_goal=2,               # int: クリスタルの数
+            start_pos=(3, 3),       # tuple of int: スタート座標
+            start_dir=0,            # int: スタート時の方向(0, 1, 2, or 3)
+            reward_hit_wall=-0.2,   # float: 壁に当たった時の報酬（ダメージ）
+            reward_move=-0.1,       # float: 動いたときの報酬（コスト）
+            reward_goal=1.0,        # float: クリスタルを得た時の報酬
+            maze_type='random',     # str: 'random' or 'fixed_maze01'
+            wall_observable=True,   # bool: 壁を観測に入れる
         ):
         """
-        Parameters
-        ----------
-        field_size :int
-            フィールドの大きさ
-        sight_size: int
-            視野の大きさ(field_sizeよりも小さくする)
-        max_time: int
-            タイムリミット
-        n_wall: int
-            壁の数
-        n_goal: int
-            ゴールの数
-        start_pos: (int, int)
-            スタート地点
-        start_dir: int (0, 1, 2, or 3)
-            スタート時の方向
-        reward_hit_wall: float
-            壁に当たったときの報酬
-        reward_move: float
-            動きのコスト
-        reward_goal: float
-            ゴールに到達したときの報酬
-        maze_type='random': str
-            迷路タイプ
-            'random', 'fixed_maze01'
-        wall_observable: bool
-            壁を観測に入れる
-        obs_in_render: bool
-            renderの出力にobsを入れる
-        sight_in_render: bool
-            renderでsight外を暗くする
+        初期処理
         """
+        # パラメータ
         self.field_size = field_size
         self.sight_size = sight_size
         self.max_time = max_time
@@ -125,8 +94,8 @@ class Env(core.coreEnv):
         self.reward_goal = reward_goal
         self.maze_type = maze_type
         self.wall_observable = wall_observable
-        self.obs_in_render = obs_in_render
-        self.sight_in_render = sight_in_render
+        self.obs_in_render = True
+        self.sight_in_render = True
 
         super().__init__()
 
@@ -158,20 +127,20 @@ class Env(core.coreEnv):
         """
         task_type を指定して、parameterを一括設定する
         """
-        if task_type == TaskType.open_field:
-            self.field_size = 5
-            self.sight_size = 4
-            self.max_time = 15
-            self.n_wall = 0
-            self.n_goal = 1
-            self.start_pos = (2, 2)
-            self.reward_hit_wall = -0.2
-            self.reward_move = -0.1
-            self.reward_goal = 1
-            self.maze_type = 'random'
-            self.wall_observable = False
+        if task_type == TaskType.no_wall:
+            self.field_size = 5           # int: フィールドの1辺の長さ
+            self.sight_size = 4           # int: 視野の長さ
+            self.max_time = 15            # int: タイムリミット
+            self.n_wall = 0               # int: 壁の数（maze_type='random'用）
+            self.n_goal = 1               # int: クリスタルの数
+            self.start_pos = (2, 2)       # tuple of int: スタート座標
+            self.reward_hit_wall = -0.2   # float: 壁に当たった時の報酬（ダメージ）
+            self.reward_move = -0.1       # float: 動いたときの報酬（コスト）
+            self.reward_goal = 1.0        # float: クリスタルを得た時の報酬
+            self.maze_type = 'random'     # str: 'random' or 'fixed_maze01'
+            self.wall_observable = False  # bool: 壁を観測に入れる
 
-        elif task_type == TaskType.fixed_cave:
+        elif task_type == TaskType.fixed_wall:
             self.field_size = 5
             self.sight_size = 2
             self.max_time = 25
@@ -184,7 +153,7 @@ class Env(core.coreEnv):
             self.maze_type = 'fixed_maze01'
             self.wall_observable = True
 
-        elif task_type == TaskType.four_crystals:
+        elif task_type == TaskType.random_wall:
             self.field_size = 7
             self.sight_size = 2
             self.max_time = 30
@@ -657,7 +626,7 @@ if __name__ == '__main__':
 
     if len(argvs) < 2:
         MSG = '\n' + \
-            '---- 操作方法 -------------------------------------\n' + \
+            '---- 実行方法 -------------------------------------\n' + \
             '[task type] を指定して実行します\n' + \
             '> python env_field.py [task_type]\n' + \
             '[task_type]\n' + \

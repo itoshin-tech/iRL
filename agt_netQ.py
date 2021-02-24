@@ -12,34 +12,17 @@ class Agt(core.coreAgt):
     Q値をニューラルネットで近似するエージェント
     """
     def __init__(
-        self,
-        n_action=2,  # 行動の種類の数（ネットワークの出力数）
-        input_size=(7, ),  # 入力サイズ
-        n_dense=64,  # 中間層のユニット数
-        epsilon=0.1,
-        gamma=0.9,
-        filepath=None,
-    ):
+            self,
+            n_action=2,         # int: 行動の種類の数（ネットワークの出力数）
+            input_size=(7, ),   # tuple of int: 入力サイズ
+            n_dense=64,         # int: 中間層のニューロン数
+            epsilon=0.1,        # float: 乱雑度
+            gamma=0.9,          # float: 割引率
+            filepath=None,      # str: 保存ファイル名
+        ):
         """
-        Parameters
-        ----------
-        n_action: int
-            行動の種類の数
-        input_size: tuple of int 例 (7,), (5, 5)
-            入力の次元
-        epsilon: float (0から1まで)
-            Q学習のε、乱雑度
-        gammma: float (0から1まで)
-            Q学習のγ、割引率
-        n_dense: int
-            中間層1のニューロン数
-        n_dense2: int or None
-            中間層2のニューロン数
-            None の場合は中間層2はなし
-        filepath: str
-            セーブ用のファイル名
+        初期処理
         """
-
         # パラメータ
         self.n_action = n_action
         self.input_size = input_size
@@ -50,7 +33,7 @@ class Agt(core.coreAgt):
 
         # 変数
         self.time = 0
-        self.model = None
+        self.model = None   # networkモデルのインスタンス用
 
         super().__init__()
 
@@ -77,7 +60,7 @@ class Agt(core.coreAgt):
         self.model.compile(
             optimizer='adam',
             loss='mean_squared_error',
-            metrics=['mse']
+            metrics=['mse'],
         )
 
     def select_action(self, observation):

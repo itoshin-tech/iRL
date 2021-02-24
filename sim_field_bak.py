@@ -24,7 +24,7 @@ if len(argvs) < 4:
         '[agt_type]\t: tableQ, netQ\n' + \
         '[task_type]\t: %s\n' % ', '.join([t.name for t in TaskType]) + \
         '[process_type]\t:learn/L, more/M, graph/G, anime/A\n' + \
-        '例 > python sim_field.py tableQ open_field L\n' + \
+        '例 > python sim_field.py tableQ no_wall L\n' + \
         '---------------------------------------------------'
     print(MSG)
     sys.exit()
@@ -76,7 +76,7 @@ else:
     sys.exit()
 
 # task_type paramter //////////
-if task_type == TaskType.fixed_cave:
+if task_type == TaskType.fixed_wall:
     n_step = 5000
     eval_interval =200
     TARGET_STEP = 12
@@ -84,7 +84,7 @@ if task_type == TaskType.fixed_cave:
     AGT_EPSILON = 0.4
     AGT_ANIME_EPSILON = 0.0
 
-elif task_type == TaskType.open_field:
+elif task_type == TaskType.no_wall:
     n_step = 5000
     eval_interval =200
     TARGET_STEP = 4
@@ -92,7 +92,7 @@ elif task_type == TaskType.open_field:
     AGT_EPSILON = 0.2
     AGT_ANIME_EPSILON = 0.0
 
-elif task_type == TaskType.four_crystals:
+elif task_type == TaskType.random_wall:
     n_step = 5000
     eval_interval =1000
     TARGET_STEP = 22

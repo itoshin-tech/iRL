@@ -23,7 +23,7 @@ if len(argvs) < 4:
         '[agt_type]\t: tableQ, netQ\n' + \
         '[task_type]\t: %s\n' % ', '.join([t.name for t in TaskType]) + \
         '[process_type]\t:learn/L, more/M, graph/G, anime/A\n' + \
-        '例 > python sim_field.py tableQ open_field L\n' + \
+        '例 > python sim_field.py tableQ no_wall L\n' + \
         '---------------------------------------------------'
     print(MSG)
     sys.exit()
@@ -116,7 +116,7 @@ ANIME_EPSILON = 0.0
 graph_prm = {}
 
 # task_type 別のパラメータ //////////
-if task_type == TaskType.fixed_cave:
+if task_type == TaskType.fixed_wall:
     sim_prm['n_step'] = 5000
     sim_prm['eval_interval'] = 200
     agt_prm['epsilon'] = 0.4
@@ -124,7 +124,7 @@ if task_type == TaskType.fixed_cave:
     graph_prm['target_reward'] = 1.0
     graph_prm['target_step'] = 12.0
 
-elif task_type == TaskType.open_field:
+elif task_type == TaskType.no_wall:
     sim_prm['n_step'] = 5000
     sim_prm['eval_interval'] = 200
     agt_prm['epsilon'] = 0.2
@@ -132,7 +132,7 @@ elif task_type == TaskType.open_field:
     graph_prm['target_reward']= 0.75
     graph_prm['target_step'] = 4.0
 
-elif task_type == TaskType.four_crystals:
+elif task_type == TaskType.random_wall:
     sim_prm['n_step'] = 5000
     sim_prm['eval_interval'] = 1000
     agt_prm['epsilon'] = 0.4

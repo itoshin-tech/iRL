@@ -20,8 +20,8 @@ class TaskType(Enum):
     """
     タスクタイプの列挙型
     """
-    L4c23 = auto()
-    L5c14 = auto()
+    short_road = auto()
+    long_road = auto()
     # mytask = auto() # オリジナルタスクタイプを追加
 
     @classmethod
@@ -103,7 +103,7 @@ class Env(core.coreEnv):
         """
         task_type を指定して、parameterを一括設定する
         """
-        if task_type == TaskType.L4c23:
+        if task_type == TaskType.short_road:
             self.field_length = 4
             self.goal_candidate = (2, 3)
             self.pos_start = 0
@@ -111,7 +111,7 @@ class Env(core.coreEnv):
             self.reward_move = -1
             self.reward_goal = 5
 
-        elif task_type == TaskType.L5c14:
+        elif task_type == TaskType.long_road:
             self.field_length = 5
             self.goal_candidate = (1, 2, 3, 4)
             self.pos_start = 0
@@ -258,7 +258,7 @@ if __name__ == '__main__':
 
     if len(argvs) < 2:
         MSG = '\n' + \
-            '---- 操作方法 -------------------------------------\n' + \
+            '---- 実行方法 -------------------------------------\n' + \
             '[task type] を指定して実行します\n' + \
             '> python env_corridor.py [task_type]\n' + \
             '[task_type]\n' + \

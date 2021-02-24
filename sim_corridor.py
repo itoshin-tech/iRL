@@ -23,7 +23,7 @@ if len(argvs) < 4:
         '[agt_type]\t: tableQ, netQ\n' + \
         '[task_type]\t: %s\n' % ', '.join([t.name for t in TaskType]) + \
         '[process_type]\t:learn/L, more/M, graph/G, anime/A\n' + \
-        '例 > python sim_corridor.py tableQ L4c23 L\n' + \
+        '例 > python sim_corridor.py tableQ short_road L\n' + \
         '---------------------------------------------------'
     print(MSG)
     sys.exit()
@@ -116,7 +116,7 @@ ANIME_EPSILON = 0.0
 graph_prm = {}
 
 # task_type 別のパラメータ //////////
-if task_type == TaskType.L4c23:
+if task_type == TaskType.short_road:
     sim_prm['n_step'] = 5000
     sim_prm['eval_interval'] = 100
     agt_prm['epsilon'] = 0.4
@@ -139,11 +139,10 @@ if task_type == TaskType.L4c23:
     ]
     sim_prm['obss'] = obss
 
-elif task_type == TaskType.L5c14:
+elif task_type == TaskType.long_road:
     sim_prm['n_step'] = 5000
     sim_prm['eval_interval'] = 100
     agt_prm['epsilon'] = 0.4
-    
     graph_prm['target_reward'] = 2.5
     graph_prm['target_step'] = 3.5
     obss = [
