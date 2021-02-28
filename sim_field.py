@@ -59,13 +59,16 @@ elif process_type in ('graph', 'G'):
     IS_LEARN = False
     IS_SHOW_GRAPH = True
     IS_SHOW_ANIME = False
-    print('グラフ表示を終了するには[q]を押します。')
+    print('[q] 終了')
 elif process_type in ('anime', 'A'):
     IS_LOAD_DATA = True
     IS_LEARN = False
     IS_SHOW_GRAPH = False
     IS_SHOW_ANIME = True
-    print('アニメーションを途中で止めるには[q]を押します。')
+    print('[o] 観測の表示のON/OFF')
+    print('[v] 視野の表示のON/OFF')
+    print('[q] 終了')
+
 else:
     print('process type が間違っています。')
     sys.exit()
