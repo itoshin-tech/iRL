@@ -162,7 +162,6 @@ if (IS_LOAD_DATA is True) or \
         raise ValueError('agt_type が間違っています')
 
     agt = Agt(**agt_prm)
-    agt.build_model()
 
     # trainer インスタンス作成
     trn = trainer.Trainer(agt, env, eval_env)

@@ -39,8 +39,6 @@ class Agt(core.coreAgt):
         self.Q = {}
         self.len_Q = 0
 
-        super().__init__()
-
     def select_action(self, obs):
         """
         観測obsに対して、行動actionを出力する
@@ -61,7 +59,7 @@ class Agt(core.coreAgt):
 
     def get_Q(self, obs):
         """
-        観測observationに対するQ値を出力する
+        観測obsに対するQ値を出力する
         """
         obs = str(obs)
         if obs in self.Q:

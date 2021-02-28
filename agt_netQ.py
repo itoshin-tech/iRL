@@ -35,9 +35,11 @@ class Agt(core.coreAgt):
         self.time = 0
         self.model = None   # networkモデルのインスタンス用
 
-        super().__init__()
+        # モデルの生成
+        self._build_model()
 
-    def build_model(self):
+
+    def _build_model(self):
         """
         指定したパラメータでモデルを構築する
         """
@@ -63,23 +65,24 @@ class Agt(core.coreAgt):
             metrics=['mse'],
         )
 
-    def select_action(self, observation):
+    def select_action(self, obs):
         """
-        観測値observationに対して、行動actionを選ぶ
+        観測値obsに対して、行動actを選ぶ
         """
 
-        Q = self.get_Q(observation)
+        Q = self.get_Q(obs)
 
         if self.epsilon < np.random.rand():
-            action = np.argmax(Q)
+            act = np.argmax(Q)
         else:
-            action = np.random.randint(0, self.n_action)
-        return action
+            act = np.random.randint(0, self.n_action)
+        return act
 
     def get_Q(self, obs):
         """
-        観測値observationに対するQ値を出力する
+        観測値obsに対するQ値を出力する
         """
+        # obsの初めに、データ番号に対応する次元を追加して入力する
         Q = self.model.predict(obs.reshape((1,) + self.input_size))[0]
         return Q
 
@@ -87,17 +90,30 @@ class Agt(core.coreAgt):
         """
         学習
         """
-        Q = self.model.predict(obs.reshape((1,) + self.input_size))
+        # (A) obs に対するネットワークモデルの出力 Qを得る
+        Q = self.get_Q(obs)
+ 
+        # (B) target にQの内容をコピー
         target = Q.copy()
-
         if done is False:
-            next_Q = self.model.predict(next_obs.reshape((1,) + self.input_size))[0]
+            # (C) 最終状態でなかったら next_obsに対する next_Qを得る
+            next_Q = self.get_Q(next_obs)
+
+            # (D) Q[obs][act]のtargetを作成
             target_act = rwd + self.gamma * max(next_Q)
         else:
+            # 最終状態の場合
             target_act = rwd
 
-        target[0][act] = target_act
-        self.model.fit(obs.reshape((1,) + self.input_size), target, verbose=0, epochs=1)
+        # (E) targetのactの要素だけtarget_actにする
+        target[act] = target_act
+
+        # (F) obsと target のペアで学習
+        self.model.fit(
+            obs.reshape((1,) + self.input_size), 
+            target.reshape(1, -1), 
+            verbose=0, epochs=1,
+            )
 
     def save_weights(self, filepath=None):
         """

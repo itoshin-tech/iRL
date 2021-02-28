@@ -12,13 +12,15 @@ class coreEnv():
         """
         インスタンス生成時の処理
         """
+        self.obs_in_render = True
+        self.sight_in_render = True
 
     def reset(self):
         """
         変数を初期化
         """
 
-    def step(self, action: int):  # pylint:disable=no-self-use
+    def step(self, action: int):
         """
         action に従って、observationを更新
 
@@ -33,7 +35,7 @@ class coreEnv():
         done = False
         return observation, reward, done
 
-    def render(self):  # pylint:disable=no-self-use
+    def render(self):
         """
         環境の状態に対応したimg を作成
 
@@ -54,13 +56,7 @@ class coreAgt():
         インスタンス生成時の処理
         """
         
-
-    def build_model(self):
-        """
-        モデル構築(Tensorflow使用時)
-        """
-
-    def select_action(self, observation):  # pylint:disable=no-self-use
+    def select_action(self, observation):
         """
         observation に基づいてaction を出力
 
@@ -71,7 +67,7 @@ class coreAgt():
         action = 0
         return action
 
-    def get_Q(self, observation):  # pylint:disable=no-self-use
+    def get_Q(self, observation):
         """
         observationに対するQ値を出力
         """

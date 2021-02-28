@@ -47,38 +47,25 @@ class Env(core.coreEnv):
 
     def __init__(
             self,
-            field_length=4,
-            goal_candidate=(2, 3),
-            pos_start=0,
-            reward_fail=0,
-            reward_move=0,
-            reward_goal=1,
+            field_length=4,         # int: フィールドの長さ
+            goal_candidate=(2, 3),  # tuple of int: ゴールの位置
+            pos_start=0,            # スタート位置
+            reward_fail=0,          # 失敗した時の報酬（ペナルティ）
+            reward_move=0,          # 進んだ時の報酬（コスト）
+            reward_goal=1,          # クリスタルを得た時の報酬
         ):
         """
-        Parameters
-        ----------
-
-        field_length: int
-            フィールドの長さ
-        goal_candidate: list of int (0からfield_length-1まで)
-            ゴールの出る場所, [2, 3], [2, 3, 5] などとする
-        reward_fail: float
-            脱出に失敗した時の報酬
-        reward_move: float
-            1歩進むことのコスト
-        reward_goal: float
-            成功した時の報酬
-        pos_start: int (0からfield_length-1まで)
-            スタート位置
+        初期処理
         """
-        # parameters
+        super().__init__()
+
+        # パラメータ
         self.field_length = field_length
         self.goal_candidate=goal_candidate
         self.pos_start = pos_start
         self.reward_fail = reward_fail
         self.reward_move = reward_move
         self.reward_goal = reward_goal
-        super().__init__()
 
         # 行動数
         self.n_action = 2

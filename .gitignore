@@ -2,4 +2,5 @@
 test*.py
 /rsc/bak*/
 /agt_backup/*
+/image_bak
 *.pyc

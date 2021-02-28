@@ -81,6 +81,8 @@ class Env(core.coreEnv):
         """
         初期処理
         """
+        super().__init__()
+        
         # パラメータ
         self.field_size = field_size
         self.sight_size = sight_size
@@ -96,8 +98,6 @@ class Env(core.coreEnv):
         self.wall_observable = wall_observable
         self.obs_in_render = True
         self.sight_in_render = True
-
-        super().__init__()
 
         # 行動数
         self.n_action = 3
@@ -123,6 +123,7 @@ class Env(core.coreEnv):
         self.img_wall = cv2.imread(PATH_WALL)
         self.unit = self.img_robot[0].shape[0]
 
+
     def set_task_type(self, task_type):
         """
         task_type を指定して、parameterを一括設定する
@@ -131,39 +132,39 @@ class Env(core.coreEnv):
             self.field_size = 5           # int: フィールドの1辺の長さ
             self.sight_size = 4           # int: 視野の長さ
             self.max_time = 15            # int: タイムリミット
-            self.n_wall = 0               # int: 壁の数（maze_type='random'用）
-            self.n_goal = 1               # int: クリスタルの数
-            self.start_pos = (2, 2)       # tuple of int: スタート座標
             self.reward_hit_wall = -0.2   # float: 壁に当たった時の報酬（ダメージ）
             self.reward_move = -0.1       # float: 動いたときの報酬（コスト）
-            self.reward_goal = 1.0        # float: クリスタルを得た時の報酬
+            self.reward_goal = 1.0        # float: クリスタルを得た時の報酬            
             self.maze_type = 'random'     # str: 'random' or 'fixed_maze01'
+            self.n_wall = 0               # int: 壁の数（'random'用）
+            self.n_goal = 1               # int: クリスタルの数（'random'用）
+            self.start_pos = (2, 2)       # tuple of int: スタート座標（'random'用）
             self.wall_observable = False  # bool: 壁を観測に入れる
 
         elif task_type == TaskType.fixed_wall:
             self.field_size = 5
             self.sight_size = 2
             self.max_time = 25
-            self.n_wall = None
-            self.n_goal = None
-            self.start_pos = None
             self.reward_hit_wall = -0.2
             self.reward_move = -0.1
             self.reward_goal = 1
             self.maze_type = 'fixed_maze01'
+            self.n_wall = None
+            self.n_goal = None
+            self.start_pos = None
             self.wall_observable = True
 
         elif task_type == TaskType.random_wall:
             self.field_size = 7
             self.sight_size = 2
             self.max_time = 30
-            self.n_wall = 4
-            self.n_goal = 4
-            self.start_pos = (3, 3)
             self.reward_hit_wall = -0.2
             self.reward_move = -0.1
             self.reward_goal = 1
             self.maze_type = 'random'
+            self.n_wall = 4
+            self.n_goal = 4
+            self.start_pos = (3, 3)
             self.wall_observable = True
         else:
             raise ValueError('task_type が間違っています')

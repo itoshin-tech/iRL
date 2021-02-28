@@ -130,6 +130,8 @@ class Trainer:
                     break
                 if key == ord('o'):
                     self.env.obs_in_render = bool(1 - self.env.obs_in_render)
+                if key == ord('v'):
+                    self.env.sight_in_render = bool(1 - self.env.sight_in_render)
 
             # 一定のステップ数で記録と評価と表示を行う
             if is_eval is True:
@@ -154,7 +156,7 @@ class Trainer:
                     # 途中経過表示
                     ptime = time.time() - stime
                     if eval_rwds_in_episode is not None:
-                        print('%s %d steps, %d sec --- eval_rwds % .2f, eval_steps % .2f' % (
+                        print('%s %d steps, %d sec --- rwds/epsd % .2f, steps/epsd % .2f' % (
                                 self.show_header,
                                 timestep, ptime,
                                 eval_rwds_in_episode,

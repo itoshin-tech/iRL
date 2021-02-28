@@ -92,38 +92,38 @@ agt_prm = {
 
 # Trainer シミュレーション共通パラメータ //////////
 sim_prm = {
-    'n_episode': -1,
-    'is_eval': True,
-    'is_learn': True,
-    'is_animation': False,
-    'eval_n_step': -1,
-    'eval_n_episode': 100,
-    'eval_epsilon': 0.0,
+    'n_episode': -1,        # エピソード数（-1は終了条件にしない）
+    'is_eval': True,        # 評価を行うか
+    'is_learn': True,       # 学習を行うか
+    'is_animation': False,  # アニメーションの表示をするか
+    'eval_n_step': -1,      # 評価のステップ数（-1は終了条件にしない）
+    'eval_n_episode': 100,  # 評価のエピソード数
+    'eval_epsilon': 0.0,    # 評価時の乱雑度
 }
 
 # Trainer アニメーション共通パラメータ //////////
 sim_anime_prm = {
-    'n_step': -1,
-    'n_episode': 100,
-    'is_eval': False,
-    'is_learn': False,
-    'is_animation': True,
-    'anime_delay': 0.2,
+    'n_step': -1,           # ステップ数（-1は終了条件にしない）
+    'n_episode': 100,       # エピソード数
+    'is_eval': False,       # 評価を行うか
+    'is_learn': False,      # 学習を行うか
+    'is_animation': True,   # アニメーションの表示をするか
+    'anime_delay': 0.2,     # フレーム間の秒数
 }
-ANIME_EPSILON = 0.0
+ANIME_EPSILON = 0.0         # アニメーション時の乱雑度
 
 # グラフ表示共通パラメータ //////////
 graph_prm = {}
 
 # task_type 別のパラメータ //////////
 if task_type == TaskType.short_road:
-    sim_prm['n_step'] = 5000
-    sim_prm['eval_interval'] = 100
-    agt_prm['epsilon'] = 0.4
-    agt_prm['gamma'] = 1.0
-    graph_prm['target_reward'] = 2.5
-    graph_prm['target_step'] = 3.5
-    obss = [
+    sim_prm['n_step'] = 5000        # ステップ数
+    sim_prm['eval_interval'] = 100  # 評価を何ステップ毎にするか
+    agt_prm['epsilon'] = 0.4        # 乱雑度
+    agt_prm['gamma'] = 1.0          # 割引率
+    graph_prm['target_reward'] = 2.5 # 報酬の目標値
+    graph_prm['target_step'] = 3.5  # ステップ数の目標値
+    obss = [                        # Q値チェック用の観測
         [
             [1, 0, 2, 0],
             [0, 1, 2, 0],
@@ -164,11 +164,11 @@ elif task_type == TaskType.long_road:
 
 # agt_type 別のパラメータ //////////
 if agt_type == 'tableQ':
-    agt_prm['init_val_Q'] = 0
-    agt_prm['alpha'] = 0.1
+    agt_prm['init_val_Q'] = 0   # Qの初期値
+    agt_prm['alpha'] = 0.1      # 学習率
 
 elif agt_type == 'netQ':
-    agt_prm['n_dense'] = 64
+    agt_prm['n_dense'] = 64     # 中間層の数
 
 # メイン //////////
 if (IS_LOAD_DATA is True) or \
@@ -184,7 +184,6 @@ if (IS_LOAD_DATA is True) or \
         raise ValueError('agt_type が間違っています')
 
     agt = Agt(**agt_prm)
-    agt.build_model()
 
     # trainer インスタンス作成
     trn = trainer.Trainer(agt, env, eval_env)
