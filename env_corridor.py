@@ -106,15 +106,6 @@ class Env(core.coreEnv):
             self.reward_move = -1
             self.reward_goal = 5
 
-            """
-        elif task_type == TaskType.mytask:  # オリジナルタスクタイプ追加
-            self.field_length = 20
-            self.goal_candidate = list(range(10, 20))
-            self.pos_start = 0
-            self.reward_fail = 0
-            self.reward_move = 0
-            self.reward_goal = 1
-            """
         else:
             raise ValueError('task_type が間違っています')
 

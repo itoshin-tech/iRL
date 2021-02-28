@@ -9,25 +9,18 @@ import numpy as np
 
 class Trainer:
     """
-    環境でエージェントを動かす
-    一定ステップ毎に評価をし記録する
+    環境とエージェントをシミュレーションする
     """
     def __init__(
         self,
-        agt=None,
-        env=None,
-        eval_env=None,
+        agt=None,       # Agt class: エージェント
+        env=None,       # Env class: 環境
+        eval_env=None,  # Env class: 評価用環境
         ):
         """
-        Parameters
-        ----------
-        agt: Agt class
-            エージェントのインスタンス
-        env: Env class
-            環境のインスタンス
-        eval_env: Env class
-            評価用の環境のインスタンス
+        初期処理
         """
+        # (A) Agt, Envのインスタンスをクラス内の変数（アトリビュート）として保持        # 
         self.agt = agt
         self.env = env
         self.eval_env = eval_env
@@ -42,49 +35,21 @@ class Trainer:
         self.eval_simhist = SimHistory()
 
     def simulate(self,
-        n_step=1000,
-        n_episode=-1,
-        is_eval=True,
-        is_learn=True,
-        is_animation=False,
-        eval_interval=100,
-        eval_n_step=-1,
-        eval_n_episode=-1,
-        eval_epsilon=0.0,
-        anime_delay=0.5,
-        obss=None,
-        show_header=''
+        n_step=1000,        # int: ステップ数(-1は終了条件にしない)
+        n_episode=-1,       # int: エピソード数(-1は終了条件にしない)
+        is_eval=True,       # bool: 評価を行うか
+        is_learn=True,      # bool: 学習を行うか
+        is_animation=False, # bool: アニメーションの表示をするか
+        eval_interval=100,  # int: 評価を何ステップ毎にするか
+        eval_n_step=-1,     # int: 評価のステップ数(-1は終了条件にしない)
+        eval_n_episode=-1,  # int: 評価のエピソード数(-1は終了条件にしない)
+        eval_epsilon=0.0,   # float: 乱雑度
+        anime_delay=0.5,    # float: アニメーションのフレーム間の秒数
+        obss=None,          # list: Q値チェック用の観測
+        show_header=''      # str: コンソール表示のヘッダー情報
         ):
         """
-        エージェントを環境で動かす
-
-        Parameters
-        ----------
-        n_step: int
-            シミュレーションを行うステップ数
-        n_episode: int
-            シミュレーションを行うエピソード数
-            -1にするとステップ数が採用される
-        is_eval: bool
-            True: 評価をする
-        is_learn: bool
-            True: 学習をする
-        is_animation: bool
-            True: アニメーションを見せる
-        eval_interval: int
-            評価用：何ステップ毎に評価を行うかを決める
-        eval_n_step: int
-            評価用：評価に行うステップ数
-        eval_n_episode: int
-            評価用パラメータ：評価に行うエピソード数
-        eval_EPSILON: int
-            評価用パラメータ：評価で設定するAgtの乱雑度
-        anime_delay: int
-            アニメーションをする際のディレイ(ms)
-        obss: list of numpy.ndarray
-            Q値をチェックする観測リスト
-        show_header: str
-            学習過程の表示のヘッダー
+        環境とエージェントをシミュレーションする
         """
         self.obss = obss
         self.show_header = show_header

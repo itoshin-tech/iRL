@@ -108,7 +108,7 @@ sim_anime_prm = {
     'is_eval': False,       # 評価を行うか
     'is_learn': False,      # 学習を行うか
     'is_animation': True,   # アニメーションの表示をするか
-    'anime_delay': 0.2,     # フレーム間の秒数
+    'anime_delay': 0.2,     # アニメーションのフレーム間の秒数
 }
 ANIME_EPSILON = 0.0         # アニメーション時の乱雑度
 
