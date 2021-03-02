@@ -8,7 +8,7 @@ import numpy as np
 import core
 
 
-class Agt(core.coreAgt):
+class TableQAgt(core.coreAgt):
     """
     Q-tableを使ったQ学習エージェント
     """

@@ -7,7 +7,7 @@ import tensorflow as tf
 import core
 
 
-class Agt(core.coreAgt):
+class NetQAgt(core.coreAgt):
     """
     Q値をニューラルネットで近似するエージェント
     """
