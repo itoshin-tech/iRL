@@ -62,7 +62,7 @@ class NetQAgt(core.coreAgt):
         self.model.compile(
             optimizer='adam',
             loss='mean_squared_error',
-            metrics=['mse'],
+            # metrics=['mse'],
         )
 
     def select_action(self, obs):
