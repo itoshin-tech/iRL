@@ -4,13 +4,15 @@ sim_corridor.py
 """
 import os
 import sys
+import numpy as np
+import matplotlib.pyplot as plt
 
 # 自作モジュール
 import env_corridor as envnow
 from env_corridor import TaskType
 from agt_tableQ import TableQAgt as Agt
 import trainer
-import myutil
+
 
 SAVE_DIR = 'agt_data'
 ENV_NAME = 'env_corridor'
@@ -36,13 +38,9 @@ if task_type is None:
         '%s\n' % ', '.join([t.name for t in TaskType])
     print(MSG)
     sys.exit()
-process_type = argvs[2]
-
-# 保存用フォルダの確認・作成 //////////
-if not os.path.exists(SAVE_DIR):
-    os.mkdir(SAVE_DIR)
 
 # process_type //////////
+process_type = argvs[2]
 if process_type in ('learn', 'L'):
     IS_LOAD_DATA = False
     IS_LEARN = True
@@ -69,7 +67,11 @@ else:
     print('process type が間違っています。')
     sys.exit()
 
-# Envインスタンス生成 //////////
+# 保存用フォルダの確認・作成 //////////
+if not os.path.exists(SAVE_DIR):
+    os.mkdir(SAVE_DIR)
+
+# 環境 インスタンス生成 //////////
 # 学習用環境
 env = envnow.Env()
 env.set_task_type(task_type)
@@ -140,8 +142,8 @@ if task_type == TaskType.short_road:
     sim_prm['obss'] = obss
 
 elif task_type == TaskType.long_road:
-    sim_prm['n_step'] = 5000
-    sim_prm['eval_interval'] = 100
+    sim_prm['n_step'] = 10000
+    sim_prm['eval_interval'] = 500
     agt_prm['epsilon'] = 0.4
     graph_prm['target_reward'] = 2.5
     graph_prm['target_step'] = 3.5
@@ -167,9 +169,10 @@ if (IS_LOAD_DATA is True) or \
     (IS_LEARN is True) or \
     (sim_prm['is_animation'] is True):
 
+    # エージェント インスタンス生成
     agt = Agt(**agt_prm)
 
-    # trainer インスタンス作成
+    # トレーナー インスタンス生成
     trn = trainer.Trainer(agt, env, eval_env)
 
     if IS_LOAD_DATA is True:
@@ -194,5 +197,54 @@ if (IS_LOAD_DATA is True) or \
         trn.simulate(**sim_anime_prm)
 
 if IS_SHOW_GRAPH is True:
+    # グラフ表示の関数定義
+    def show_graph(pathname, target_reward=None, target_step=None):
+        """
+        学習曲線の表示
+
+        Parameters
+        ----------
+        target_reward: float or None
+            rewardの目標値に線を引く
+        target_step: float or None
+            stepの目標値に線を引く
+        """
+        hist = np.load(pathname + '.npz')
+        eval_rwd = hist['eval_rwds'].tolist()
+        eval_step = hist['eval_steps'].tolist()
+        eval_x = hist['eval_x'].tolist()
+
+        plt.figure(figsize=(8,4))
+        plt.subplots_adjust(hspace=0.6)
+
+        # reward / episode
+        plt.subplot(211)
+        plt.plot(eval_x, eval_rwd, 'b.-')
+        if target_reward is not None:
+            plt.plot(
+                [eval_x[0], eval_x[-1]],
+                [target_reward, target_reward],
+                'r:')
+
+        plt.title('rewards / episode')
+        plt.grid(True)
+
+        # steps / episode
+        plt.subplot(212)
+        plt.plot(eval_x, eval_step, 'b.-')
+        if target_step is not None:
+            plt.plot(
+                [eval_x[0], eval_x[-1]],
+                [target_step, target_step],
+                'r:')
+        plt.title('steps / episode')
+        plt.xlabel('steps')
+        plt.grid(True)
+
+        plt.show()    
+    
     # グラフ表示
-    myutil.show_graph(agt_prm['filepath'], **graph_prm)
+    show_graph(agt_prm['filepath'], **graph_prm)
+
+
+

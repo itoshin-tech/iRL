@@ -26,13 +26,13 @@ class Trainer:
         self.eval_env = eval_env
 
         # 変数
-        self.hist_eval_rwds_in_episode = []
-        self.hist_eval_steps_in_episode = []
-        self.hist_eval_x = []
+        self.hist_rwds = []
+        self.hist_steps = []
+        self.hist_time = []
         self.hist_start_x = 0
 
         # 学習履歴データ保存クラスのインスタンス生成
-        self.eval_simhist = SimHistory()
+        self.recorder = Recorder()
 
     def simulate(self,
         n_step=1000,        # int: ステップ数(-1は終了条件にしない)
@@ -101,37 +101,26 @@ class Trainer:
             # 一定のステップ数で記録と評価と表示を行う
             if is_eval is True:
                 if (timestep % eval_interval == 0) and (timestep > 0):
-                    # 記録用変数の初期化
-                    eval_rwds_in_episode = None
-                    eval_steps_in_episode = None
                     if (eval_n_step > 0) or (eval_n_episode > 0):
                         # 評価を行う
-                        out = self.evaluation(
+                        eval_rwds, eval_steps = self.evaluation(
                             eval_n_step=eval_n_step,
                             eval_n_episode=eval_n_episode,
                             eval_epsilon=eval_epsilon,
                         )
                         # 記録
-                        eval_rwds_in_episode = out.mean_rwds[0]
-                        eval_steps_in_episode = out.mean_STEPs_in_episode[0]
-                        self.hist_eval_rwds_in_episode.append(eval_rwds_in_episode)
-                        self.hist_eval_steps_in_episode.append(eval_steps_in_episode)
-                        self.hist_eval_x.append(self.hist_start_x + timestep)
+                        self.hist_rwds.append(eval_rwds)
+                        self.hist_steps.append(eval_steps)
+                        self.hist_time.append(self.hist_start_x + timestep)
 
-                    # 途中経過表示
-                    ptime = time.time() - stime
-                    if eval_rwds_in_episode is not None:
+                        # 途中経過表示
+                        ptime = time.time() - stime
                         print('%s %d steps, %d sec --- rwds/epsd % .2f, steps/epsd % .2f' % (
                                 self.show_header,
-                                timestep, ptime,
-                                eval_rwds_in_episode,
-                                eval_steps_in_episode,
-                                )
-                            )
-                    else:
-                        print('%s %d --- %d sec' % (
-                                self.show_header,
-                                timestep, ptime,
+                                self.hist_start_x + timestep,
+                                ptime,
+                                eval_rwds,
+                                eval_steps,
                                 )
                             )
 
@@ -168,7 +157,7 @@ class Trainer:
         """
         epsilon_backup = self.agt.epsilon
         self.agt.epsilon = eval_epsilon
-        self.eval_simhist.reset()
+        self.recorder.reset()
         obs = self.eval_env.reset()
         timestep = 0
         episode = 0
@@ -179,7 +168,7 @@ class Trainer:
             if done is False:
                 act = self.agt.select_action(obs)
                 next_obs, rwd, next_done = self.eval_env.step(act)
-                self.eval_simhist.add(act, rwd, next_done) # 記録用
+                self.recorder.add(act, rwd, next_done) # 記録
             else:
                 next_obs = self.eval_env.reset()
                 rwd = None
@@ -197,11 +186,12 @@ class Trainer:
 
             timestep += 1
             episode += done
-        self.eval_simhist.record()
-
+        # シミュレーション終了処理
         self.agt.epsilon = epsilon_backup
+        # 結果
+        mean_rwds, mean_steps = self.recorder.get_result()
 
-        return self.eval_simhist
+        return mean_rwds, mean_steps
 
     def _show_Q(self):
         if self.obss is None:
@@ -223,9 +213,9 @@ class Trainer:
         履歴をセーブ
         """
         np.savez(pathname + '.npz',
-            eval_rwds=self.hist_eval_rwds_in_episode,
-            eval_steps=self.hist_eval_steps_in_episode,
-            eval_x=self.hist_eval_x,
+            eval_rwds=self.hist_rwds,
+            eval_steps=self.hist_steps,
+            eval_x=self.hist_time,
         )
 
     def load_history(self, pathname):
@@ -233,13 +223,13 @@ class Trainer:
         履歴をロード
         """
         hist = np.load(pathname + '.npz')
-        self.hist_eval_rwds_in_episode = hist['eval_rwds'].tolist()
-        self.hist_eval_steps_in_episode = hist['eval_steps'].tolist()
-        self.hist_eval_x = hist['eval_x'].tolist()
-        self.hist_start_x = self.hist_eval_x[-1]
+        self.hist_rwds = hist['eval_rwds'].tolist()
+        self.hist_steps = hist['eval_steps'].tolist()
+        self.hist_time = hist['eval_x'].tolist()
+        self.hist_start_x = self.hist_time[-1]
 
 
-class SimHistory:
+class Recorder:
     """
     シミュレーションの履歴保存クラス
     """
@@ -248,22 +238,20 @@ class SimHistory:
 
     def reset(self, init_step = 0):
         """
-        履歴をリセット
+        記録をリセット
         """
         self.mean_rwds = []
         self.rwds = []
         self.rwd  = 0
 
-        self.mean_STEPs_in_episode = []
         self.steps_in_episode = []
         self.step_in_episode = 0
 
-        self.steps_for_mean = []
         self.stepcnt = init_step
 
     def add(self, act, rwd, done):  # pylint:disable=unused-argument
         """
-        履歴の追加
+        記録の追加
         """
         self.rwd += rwd
         self.step_in_episode += 1
@@ -274,13 +262,15 @@ class SimHistory:
             self.steps_in_episode.append(self.step_in_episode)
             self.step_in_episode = 0
 
-    def record(self):
+    def get_result(self):
         """
-        履歴の平均の計算と保存
+        報酬とステップの
+        エピソード当たりの平均を求めて出力
         """
-        self.mean_rwds.append(np.mean(self.rwds))
+        mean_rwds = np.mean(self.rwds)
         self.rwds = []
-
-        self.mean_STEPs_in_episode.append(np.mean(self.steps_in_episode))
+        mean_steps = np.mean(self.steps_in_episode)
         self.steps_in_episode = []
-        self.steps_for_mean.append(self.stepcnt)
+        return mean_rwds, mean_steps
+    
+

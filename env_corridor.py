@@ -7,8 +7,6 @@ from enum import Enum, auto
 import numpy as np
 import cv2
 
-# 自作モジュール
-import myutil
 
 PATH_ROBOT = 'rsc/robo_right.png'
 PATH_CRYSTAL = 'rsc/crystal_small.png'
@@ -183,11 +181,11 @@ class Env():
 
         # ブロック各種の描画
         for i_x in range(self.field_length):
-            img = myutil.copy_img(img, self.img_brank, unit * i_x, 0)
+            img = self._copy_img(img, self.img_brank, unit * i_x, 0)
 
         # ゴールの描画
         if self.agt_state != 'goal':
-            img = myutil.copy_img(img, self.img_crystal, unit * self.goal_pos, 0, isTrans=True)
+            img = self._copy_img(img, self.img_crystal, unit * self.goal_pos, 0, isTrans=True)
 
         # ロボットの描画
         img = self._draw_robot(img)
@@ -213,9 +211,42 @@ class Env():
         # ロボット画像の貼り付け
         unit = self.unit
         x0 = np.array(self.agt_pos) * unit
-        img = myutil.copy_img(img, img_robot, x0, 0, isTrans=True)
+        img = self._copy_img(img, img_robot, x0, 0, isTrans=True)
 
         return img        
+
+    def _copy_img(self, img, img_obj, x, y, isTrans=False):
+        """
+        img にimg_objをコピーする
+
+        Parameters
+        ----------
+        img: 3d numpy.ndarray
+            張り付ける先の画像
+        img_obj: 3d numpy.ndarray
+            張り付ける画像
+        x, y: int
+            img 上でのり付ける座標
+        isTrans: bool
+            True: 白を透明にする
+        
+        Returns
+        -------
+        img: 3d numpy.ndarray
+            コピー後の画像
+        
+        """
+        img_out = img.copy()
+        h, w = img_obj.shape[:2]
+        x1 = x + w
+        y1 = y + h
+        if isTrans is True:
+            idx = np.where(np.all(img_obj==255, axis=-1))
+            img_back = img[y:y1, x:x1, :].copy()
+            img_obj[idx] = img_back[idx]
+        img_out[y:y1, x:x1, :] = img_obj
+        
+        return img_out
 
 
 def _show_obs(act, rwd, obs, done):
