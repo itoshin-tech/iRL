@@ -7,7 +7,7 @@ import tensorflow as tf
 import core
 
 
-class Agt(core.coreAgt):
+class NetQAgt(core.coreAgt):
     """
     Q値をニューラルネットで近似するエージェント
     """
@@ -62,7 +62,7 @@ class Agt(core.coreAgt):
         self.model.compile(
             optimizer='adam',
             loss='mean_squared_error',
-            metrics=['mse'],
+            # metrics=['mse'],
         )
 
     def select_action(self, obs):

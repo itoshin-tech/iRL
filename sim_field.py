@@ -158,9 +158,9 @@ if (IS_LOAD_DATA is True) or \
 
     # エージェントをインポートしてインスタンス作成
     if agt_type == 'tableQ':
-        from agt_tableQ import Agt
+        from agt_tableQ import TableQAgt as Agt
     elif agt_type == 'netQ':
-        from agt_netQ import Agt
+        from agt_netQ import NetQAgt as Agt
     else:
         raise ValueError('agt_type が間違っています')
 
