@@ -5,10 +5,9 @@ Q-tableを使ったQ学習アルゴリズム
 import sys
 import pickle
 import numpy as np
-import core
 
 
-class TableQAgt(core.coreAgt):
+class TableQAgt():
     """
     Q-tableを使ったQ学習エージェント
     """

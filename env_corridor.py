@@ -8,7 +8,6 @@ import numpy as np
 import cv2
 
 # 自作モジュール
-import core
 import myutil
 
 PATH_ROBOT = 'rsc/robo_right.png'
@@ -35,7 +34,7 @@ class TaskType(Enum):
         return None
 
 
-class Env(core.coreEnv):
+class Env():
     """
     フィールドが1次元のシンプルな迷路
     """
@@ -184,14 +183,14 @@ class Env(core.coreEnv):
 
         # ブロック各種の描画
         for i_x in range(self.field_length):
-            myutil.copy_img(img, self.img_brank, unit * i_x, 0)
+            img = myutil.copy_img(img, self.img_brank, unit * i_x, 0)
 
         # ゴールの描画
         if self.agt_state != 'goal':
-            myutil.copy_img(img, self.img_crystal, unit * self.goal_pos, 0, isTrans=True)
+            img = myutil.copy_img(img, self.img_crystal, unit * self.goal_pos, 0, isTrans=True)
 
         # ロボットの描画
-        self._draw_robot(img)
+        img = self._draw_robot(img)
 
         return img
 

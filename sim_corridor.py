@@ -8,6 +8,7 @@ import sys
 # 自作モジュール
 import env_corridor as envnow
 from env_corridor import TaskType
+from agt_tableQ import TableQAgt as Agt
 import trainer
 import myutil
 
@@ -15,29 +16,27 @@ SAVE_DIR = 'agt_data'
 ENV_NAME = 'env_corridor'
 
 argvs = sys.argv
-if len(argvs) < 4:
+if len(argvs) < 3:
     MSG = '\n' + \
         '---- 使い方 ---------------------------------------\n' + \
-        '3つのパラメータを指定して実行します\n\n' + \
-        '> python sim_corridor.py [agt_type] [task_type] [process_type]\n\n' + \
-        '[agt_type]\t: tableQ, netQ\n' + \
+        '2つのパラメータを指定して実行します\n\n' + \
+        '> python sim_corridor.py [task_type] [process_type]\n\n' + \
         '[task_type]\t: %s\n' % ', '.join([t.name for t in TaskType]) + \
         '[process_type]\t:learn/L, more/M, graph/G, anime/A\n' + \
-        '例 > python sim_corridor.py tableQ short_road L\n' + \
+        '例 > python sim_corridor.py short_road L\n' + \
         '---------------------------------------------------'
     print(MSG)
     sys.exit()
 
 # 入力パラメータの確認 //////////
-agt_type = argvs[1]
-task_type = TaskType.Enum_of(argvs[2])
+task_type = TaskType.Enum_of(argvs[1])
 if task_type is None:
     MSG = '\n' + \
         '[task type] が異なります。以下から選んで指定してください。\n' + \
         '%s\n' % ', '.join([t.name for t in TaskType])
     print(MSG)
     sys.exit()
-process_type = argvs[3]
+process_type = argvs[2]
 
 # 保存用フォルダの確認・作成 //////////
 if not os.path.exists(SAVE_DIR):
@@ -80,13 +79,14 @@ obs = env.reset()
 eval_env = envnow.Env()
 eval_env.set_task_type(task_type)
 
-# Agt 共通パラメータ //////////
+# Agt パラメータ //////////
 agt_prm = {
     'input_size': obs.shape,
     'n_action': env.n_action,
+    'init_val_Q': 0,    # Qの初期値
+    'alpha': 0.1,       # 学習率
     'filepath': SAVE_DIR + '/sim_' + \
                 ENV_NAME + '_' + \
-                agt_type + '_' + \
                 task_type.name
 }
 
@@ -162,26 +162,10 @@ elif task_type == TaskType.long_road:
     ]
     sim_prm['obss'] = obss
 
-# agt_type 別のパラメータ //////////
-if agt_type == 'tableQ':
-    agt_prm['init_val_Q'] = 0   # Qの初期値
-    agt_prm['alpha'] = 0.1      # 学習率
-
-elif agt_type == 'netQ':
-    agt_prm['n_dense'] = 64     # 中間層の数
-
 # メイン //////////
 if (IS_LOAD_DATA is True) or \
     (IS_LEARN is True) or \
     (sim_prm['is_animation'] is True):
-
-    # エージェントをインポートしてインスタンス作成
-    if agt_type == 'tableQ':
-        from agt_tableQ import TableQAgt as Agt
-    elif agt_type == 'netQ':
-        from agt_netQ import NetQAgt as Agt
-    else:
-        raise ValueError('agt_type が間違っています')
 
     agt = Agt(**agt_prm)
 
