@@ -4,7 +4,6 @@
 
 ※筆者のノートPCのCPUは、Intel Core i7-6600UでGPUなし。i7でも第6世代なので結構遅く、i5-7500Uの方が上のようです。 [参考：CPU性能比較表 | 最新から定番のCPUまで簡単に比較](https://pcrecommend.com/cpu/)
 
-<img src="image/netQ_random_wall_40000_15sec.gif" width="400" height="400">
 
 タスクは、ロボットを動かして全てのゴール（クリスタル）に訪れるとクリアというものです。マップはエピソード毎にランダムに生成されます。
 
