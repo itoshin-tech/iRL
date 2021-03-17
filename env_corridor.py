@@ -32,7 +32,7 @@ class TaskType(Enum):
         return None
 
 
-class Env():
+class CorridorEnv():
     """
     フィールドが1次元のシンプルな迷路
     """
@@ -117,7 +117,7 @@ class Env():
         self.agt_state = 'move' # render 用
 
         self.agt_pos = self.pos_start
-        self.field = np.ones(self.field_length, dtype=int) * Env.ID_brank
+        self.field = np.ones(self.field_length, dtype=int) * CorridorEnv.ID_brank
         idx = np.random.randint(len(self.goal_candidate))
         self.goal_pos = self.goal_candidate[idx]
 
@@ -166,8 +166,8 @@ class Env():
         現在の状態から、エージェントが受け取る入力情報を生成
         """
         observation = self.field.copy()
-        observation[self.goal_pos] = Env.ID_goal
-        observation[self.agt_pos] = Env.ID_agt
+        observation[self.goal_pos] = CorridorEnv.ID_goal
+        observation[self.agt_pos] = CorridorEnv.ID_agt
         return observation
 
     def render(self):
@@ -276,7 +276,7 @@ if __name__ == '__main__':
         print(MSG)
         sys.exit()
 
-    env = Env()
+    env = CorridorEnv()
     ttype = TaskType.Enum_of(argvs[1])
     if ttype is None:
         MSG = '\n' + \

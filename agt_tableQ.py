@@ -21,9 +21,10 @@ class TableQAgt():
         gamma=0.9,          # float: 割引率
         max_memory=500,     # int: 記憶する最大の観測数
         filepath=None,      # str: セーブ用のファイル名
-    ):
-        # (A) クラス内で使用する変数（アトリビュート）の提議
-        # 実際のコードではAgtの引数で設定するようにしている
+        ):
+        
+        # クラス内で使用する変数（アトリビュート）の提議
+        # 実際のコードではTableQAgtの引数で設定するようにしている
         self.n_action = n_action
         self.input_size = input_size
         self.init_val_Q = init_val_Q
@@ -42,17 +43,17 @@ class TableQAgt():
         """
         観測obsに対して、行動actionを出力する
         """
-        # (A) obsを文字列に変換
+        # obsを文字列に変換
         obs = str(obs)
 
-        # (B) next_obs がself.Qのキーになかったら追加する
+        # next_obs がself.Qのキーになかったら追加する
         self._check_and_add_observation(obs)
 
         if np.random.rand() < self.epsilon:
-            # (C)  epsilon の確率でランダムに行動を選ぶ
+            # epsilon の確率でランダムに行動を選ぶ
             act = np.random.randint(0, self.n_action)
         else:
-            # (D) 1- epsilon の確率でQの値を最大とする行動を選ぶ
+            # 1- epsilon の確率でQの値を最大とする行動を選ぶ
             act = np.argmax(self.Q[obs])
         return act
 
@@ -81,20 +82,20 @@ class TableQAgt():
         """
         学習する
         """
-        # (A) obs, next_obs を文字列に変換
+        # obs, next_obs を文字列に変換
         obs = str(obs)
         next_obs = str(next_obs)
 
-        # (B) next_obsがself.Qのキーになかったら追加する
+        # next_obsがself.Qのキーになかったら追加する
         self._check_and_add_observation(next_obs)
 
-        # (C) 学習のtargetを作成
+        # 学習のtargetを作成
         if next_done is False:
             target = rwd + self.gamma * max(self.Q[next_obs])
         else:
             target = rwd
 
-        # (D) Qをtargetに近づける
+        # Qをtargetに近づける
         self.Q[obs][act] = (1-self.alpha) * self.Q[obs][act] + \
                            self.alpha * target
 

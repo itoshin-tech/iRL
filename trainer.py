@@ -13,14 +13,15 @@ class Trainer:
     """
     def __init__(
         self,
-        agt=None,       # Agt class: エージェント
-        env=None,       # Env class: 環境
-        eval_env=None,  # Env class: 評価用環境
+        agt=None,       # TableQTableQAgt class: エージェント
+        env=None,       # CorridorEnv class: 環境
+        eval_env=None,  # CorridorEnv class: 評価用環境
         ):
         """
         初期処理
         """
-        # (A) Agt, Envのインスタンスをクラス内の変数（アトリビュート）として保持        # 
+        # TableQTableQAgt, CorridorCorridorEnvのインスタンスを
+        # クラス内の変数（アトリビュート）として保持
         self.agt = agt
         self.env = env
         self.eval_env = eval_env
@@ -69,6 +70,8 @@ class Trainer:
             if done is False:
                 # agtが行動を選ぶ
                 act = self.agt.select_action(obs)
+
+                # envが次の観測と報酬を決める 
                 next_obs, rwd, next_done = self.env.step(act)
 
                 # agtが学習する
@@ -124,7 +127,7 @@ class Trainer:
                                 )
                             )
 
-            # 指定したstepかepisode数に達したら終了
+            # 指定したstepがn_stepに達するか、episode数がn_episodeに達したら終了
             if n_step > 0:
                 if timestep >= n_step:
                     break

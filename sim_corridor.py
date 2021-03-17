@@ -8,10 +8,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # 自作モジュール
-import env_corridor as envnow
+from env_corridor import CorridorEnv
 from env_corridor import TaskType
-from agt_tableQ import TableQAgt as Agt
-import trainer
+from agt_tableQ import TableQAgt
+from trainer import Trainer
 
 
 SAVE_DIR = 'agt_data'
@@ -73,15 +73,15 @@ if not os.path.exists(SAVE_DIR):
 
 # 環境 インスタンス生成 //////////
 # 学習用環境
-env = envnow.Env()
+env = CorridorEnv()
 env.set_task_type(task_type)
 obs = env.reset()
 
 # 評価用環境
-eval_env = envnow.Env()
+eval_env = CorridorEnv()
 eval_env.set_task_type(task_type)
 
-# Agt パラメータ //////////
+# TableQAgt パラメータ //////////
 agt_prm = {
     'input_size': obs.shape,
     'n_action': env.n_action,
@@ -169,17 +169,17 @@ if (IS_LOAD_DATA is True) or \
     (IS_LEARN is True) or \
     (sim_prm['is_animation'] is True):
 
-    # エージェント インスタンス生成
-    agt = Agt(**agt_prm)
+    # Agtのインスタンス生成、ディクショナリ型でパラメータを渡すときには **　を付ける
+    agt = TableQAgt(**agt_prm)
 
-    # トレーナー インスタンス生成
-    trn = trainer.Trainer(agt, env, eval_env)
+    # Trainerのインスタンス生成
+    trainer = Trainer(agt, env, eval_env)
 
     if IS_LOAD_DATA is True:
         # エージェントのデータロード
         try:
             agt.load_weights()
-            trn.load_history(agt.filepath)
+            trainer.load_history(agt.filepath)
         except Exception as e:
             print(e)
             print('エージェントのパラメータがロードできません')
@@ -187,14 +187,19 @@ if (IS_LOAD_DATA is True) or \
 
     if IS_LEARN is True:
         # 学習
-        trn.simulate(**sim_prm)
+        # シミュレーション実行、ディクショナリ型は**でパラメータ指定        
+        trainer.simulate(**sim_prm)
+
+        # エージェントの学習結果保存        
         agt.save_weights()
-        trn.save_history(agt.filepath)
+
+        # 学習履歴保存
+        trainer.save_history(agt.filepath)
 
     if IS_SHOW_ANIME is True:
         # アニメーション
         agt.epsilon = ANIME_EPSILON
-        trn.simulate(**sim_anime_prm)
+        trainer.simulate(**sim_anime_prm)
 
 if IS_SHOW_GRAPH is True:
     # グラフ表示の関数定義
@@ -243,7 +248,7 @@ if IS_SHOW_GRAPH is True:
 
         plt.show()    
     
-    # グラフ表示
+    # 学習履歴表示
     show_graph(agt_prm['filepath'], **graph_prm)
 
 
