@@ -19,7 +19,6 @@ class TaskType(Enum):
     """
     short_road = auto()
     long_road = auto()
-    # mytask = auto() # オリジナルタスクタイプを追加
 
     @classmethod
     def Enum_of(cls, task_str):
@@ -36,7 +35,6 @@ class CorridorEnv():
     """
     フィールドが1次元のシンプルな迷路
     """
-
     # 内部表現のID
     ID_brank = 0
     ID_agt = 1
@@ -87,15 +85,15 @@ class CorridorEnv():
         """
         task_type を指定して、parameterを一括設定する
         """
-        if task_type == TaskType.short_road:
-            self.field_length = 4
-            self.goal_candidate = (2, 3)
-            self.pos_start = 0
-            self.reward_fail = -1
-            self.reward_move = -1
-            self.reward_goal = 5
+        if task_type == TaskType.short_road:  # (1)
+            self.field_length = 4           # 廊下の長さ
+            self.goal_candidate = (2, 3)    # クリスタルの出る位置の候補
+            self.pos_start = 0              # スタート地点
+            self.reward_fail = -1           # 「拾う」の失敗時の報酬（ペナルティ）
+            self.reward_move = -1           # 「進む」の報酬（コスト）
+            self.reward_goal = 5            # 「拾う」の成功時の報酬
 
-        elif task_type == TaskType.long_road:
+        elif task_type == TaskType.long_road:  # (2)
             self.field_length = 5
             self.goal_candidate = (1, 2, 3, 4)
             self.pos_start = 0

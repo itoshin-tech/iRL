@@ -35,7 +35,8 @@ class Trainer:
         # 学習履歴データ保存クラスのインスタンス生成
         self.recorder = Recorder()
 
-    def simulate(self,
+    def simulate(
+        self,
         n_step=1000,        # int: ステップ数(-1は終了条件にしない)
         n_episode=-1,       # int: エピソード数(-1は終了条件にしない)
         is_eval=True,       # bool: 評価を行うか
@@ -60,8 +61,8 @@ class Trainer:
 
         # 環境クラスと変数を初期化 (1)
         obs = self.env.reset()
-        timestep = 0
-        episode = 0
+        timestep = 0  # ステップのカウント
+        episode = 0  # エピソードのカウント
         done = False
         self.on_simulation = True
 
