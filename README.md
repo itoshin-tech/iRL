@@ -33,18 +33,18 @@ short_roadの代わりに、long_roadを指定することもできます。
 ```
 ---- 使い方 ---------------------------------------
 2つのパラメータを指定して実行します
-> python sim_corridor.py [task_type] [process_type]
+> python main_corridor.py [task_type] [process_type]
 
 [task_type]     : short_road, long_road
 [process_type]  :learn/L, more/M, graph/G, anime/A
-例 > python sim_corridor.py short_road L
+例 > python main_corridor.py short_road L
 ---------------------------------------------------
 ```
 
 task_type をshort_road に指定して実行するには以下のようにします。
 
 ```
-> python sim_corridor.py short_road L
+> python main_corridor.py short_road L
 ```
 
 学習はすぐに終わり、結果のグラフが表示されます。
@@ -53,13 +53,13 @@ task_type をshort_road に指定して実行するには以下のようにし�
 
 以下のコマンドで、追加学習ができます。
 ```
-> python sim_corridor.py short_road M
+> python main_corridor.py short_road M
 ```
 
 以下のコマンドで、学習結果のアニメーションを見ることができます。
 
 ```
-> python sim_corridor.py short_road A
+> python main_corridor.py short_road A
 ```
 ![](image/20210319_065827.gif)
 

@@ -16,12 +16,12 @@ class Trainer:
         agt=None,       # TableQTableQAgt class: エージェント
         env=None,       # CorridorEnv class: 環境
         eval_env=None,  # CorridorEnv class: 評価用環境
-        ):
+        ):  # (1)
         """
         初期処理
         """
         # TableQTableQAgt, CorridorCorridorEnvのインスタンスを
-        # クラス内の変数（アトリビュート）として保持
+        # クラス内の変数（アトリビュート）として保持 (2)
         self.agt = agt
         self.env = env
         self.eval_env = eval_env
@@ -58,33 +58,33 @@ class Trainer:
         # 開始時間の記録
         stime = time.time()
 
-        # 環境クラスと変数を初期化
+        # 環境クラスと変数を初期化 (1)
         obs = self.env.reset()
         timestep = 0
         episode = 0
         done = False
         self.on_simulation = True
 
-        # シミュレーションのループ開始
+        # シミュレーションのループ開始 (2)
         while self.on_simulation:
             if done is False:
-                # agtが行動を選ぶ
+                # agtが行動を選ぶ (3)
                 act = self.agt.select_action(obs)
 
-                # envが次の観測と報酬を決める 
+                # envが次の観測と報酬を決める  (4)
                 next_obs, rwd, next_done = self.env.step(act)
 
-                # agtが学習する
+                # agtが学習する (5)
                 if is_learn is True:
                     self.agt.learn(obs, act, rwd, next_obs, next_done)
 
             else:
-                # 最終状態になったら、envを初期化する
+                # 最終状態になったら、envを初期化する (6)
                 next_obs = self.env.reset()
                 rwd = None
                 next_done = False
 
-            # next_obs, next_done を次の学習のために保持
+            # next_obs, next_done を次の学習のために保持 (7)
             obs = next_obs
             done = next_done
 
@@ -127,7 +127,8 @@ class Trainer:
                                 )
                             )
 
-            # 指定したstepがn_stepに達するか、episode数がn_episodeに達したら終了
+            # 指定したstepがn_stepに達するか、
+            # episode数がn_episodeに達したら終了 (8)
             if n_step > 0:
                 if timestep >= n_step:
                     break
@@ -141,7 +142,6 @@ class Trainer:
         # Q値を表示
         self._show_Q()
  
-        return
 
     def off_simulation(self):
         """

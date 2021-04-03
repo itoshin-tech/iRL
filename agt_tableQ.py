@@ -104,7 +104,7 @@ class TableQAgt():
         学習をファイルに保存する
         """
         if filepath is None:
-            filepath = self.filepath
+            filepath = self.filepath + '.pkl'
         with open(filepath, mode='wb') as f:
             pickle.dump(self.Q, f)
 
@@ -113,7 +113,7 @@ class TableQAgt():
         学習をファイルから読み込む
         """
         if filepath is None:
-            filepath = self.filepath
+            filepath = self.filepath + '.pkl'
         with open(filepath, mode='rb') as f:
             self.Q = pickle.load(f)
     
