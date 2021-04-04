@@ -82,7 +82,6 @@ eval_env.set_task_type(task_type)
 
 # TableQAgt パラメータ //////////
 agt_prm = {                     # (7)
-    'input_size': obs.shape,
     'n_action': env.n_action,
     'init_val_Q': 0,    # Qの初期値
     'alpha': 0.1,       # 学習率

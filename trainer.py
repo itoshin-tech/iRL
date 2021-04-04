@@ -17,9 +17,6 @@ class Trainer:
         env=None,       # CorridorEnv class: 環境
         eval_env=None,  # CorridorEnv class: 評価用環境
         ):  # (1)
-        """
-        初期処理
-        """
         # TableQTableQAgt, CorridorCorridorEnvのインスタンスを
         # クラス内の変数（アトリビュート）として保持 (2)
         self.agt = agt
