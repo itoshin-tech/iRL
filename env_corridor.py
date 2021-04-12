@@ -45,9 +45,9 @@ class CorridorEnv():
             field_length=4,         # int: フィールドの長さ
             goal_candidate=(2, 3),  # tuple of int: ゴールの位置
             pos_start=0,            # スタート位置
-            reward_fail=0,          # 失敗した時の報酬（ペナルティ）
-            reward_move=0,          # 進んだ時の報酬（コスト）
-            reward_goal=1,          # クリスタルを得た時の報酬
+            reward_fail=-1,          # 失敗した時の報酬（ペナルティ）
+            reward_move=-1,          # 進んだ時の報酬（コスト）
+            reward_goal=5,          # クリスタルを得た時の報酬
         ):
         """
         初期処理
@@ -68,11 +68,7 @@ class CorridorEnv():
         # 変数
         self.agt_pos = None
         self.goal_pos = None
-        self.field = None
         self.is_first_step = None
-        self.done = None
-        self.reward = None
-        self.action = None
         self.agt_state = None # render 用
 
         # 画像のロード
@@ -109,13 +105,9 @@ class CorridorEnv():
         """
         内部状態をリセットする
         """
-        self.done = False
-        self.reward = None
-        self.action = 1
         self.agt_state = 'move' # render 用
 
         self.agt_pos = self.pos_start
-        self.field = np.ones(self.field_length, dtype=int) * CorridorEnv.ID_brank
         idx = np.random.randint(len(self.goal_candidate))
         self.goal_pos = self.goal_candidate[idx]
 
@@ -153,9 +145,6 @@ class CorridorEnv():
         observation = self._make_observation()
 
         # render 用
-        self.done = done
-        self.reward = reward
-        self.action = action
 
         return observation, reward, done
 
@@ -163,7 +152,7 @@ class CorridorEnv():
         """
         現在の状態から、エージェントが受け取る入力情報を生成
         """
-        observation = self.field.copy()
+        observation = np.ones(self.field_length, dtype=int) * CorridorEnv.ID_brank
         observation[self.goal_pos] = CorridorEnv.ID_goal
         observation[self.agt_pos] = CorridorEnv.ID_agt
         return observation
@@ -249,7 +238,7 @@ class CorridorEnv():
 
 def _show_obs(act, rwd, obs, done):
     """
-    変数を表示
+    強化学習の情報をコンソールに表示
     """
     if act is not None:
         print('act:%d, rwd:% .2f, obs:%s, done:%s' % (act, rwd, obs, done))
