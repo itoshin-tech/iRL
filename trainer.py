@@ -28,6 +28,10 @@ class Trainer:
         self.hist_steps = []
         self.hist_time = []
         self.hist_start_x = 0
+        self.obss = None
+        self.show_header = None
+        self.on_simulation = None
+
 
         # 学習履歴データ保存クラスのインスタンス生成
         self.recorder = Recorder()
@@ -139,7 +143,6 @@ class Trainer:
 
         # Q値を表示
         self._show_Q()
- 
 
     def off_simulation(self):
         """
@@ -169,7 +172,7 @@ class Trainer:
             if done is False:
                 act = self.agt.select_action(obs)
                 next_obs, rwd, next_done = self.eval_env.step(act)
-                self.recorder.add(act, rwd, next_done) # 記録
+                self.recorder.add(rwd, next_done)  # 記録
             else:
                 next_obs = self.eval_env.reset()
                 rwd = None
@@ -235,6 +238,10 @@ class Recorder:
     シミュレーションの履歴保存クラス
     """
     def __init__(self):
+        self.rwd = None
+        self.rwds = None
+        self.step_in_episode = None
+        self.steps_in_episode = None
         self.reset()
 
     def reset(self, init_step = 0):
@@ -250,7 +257,7 @@ class Recorder:
 
         self.stepcnt = init_step
 
-    def add(self, act, rwd, done):  # pylint:disable=unused-argument
+    def add(self, rwd, done):
         """
         記録の追加
         """
@@ -273,5 +280,3 @@ class Recorder:
         mean_steps = np.mean(self.steps_in_episode)
         self.steps_in_episode = []
         return mean_rwds, mean_steps
-    
-

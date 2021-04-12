@@ -9,9 +9,9 @@ import matplotlib.pyplot as plt
 
 # 自作モジュール
 from env_corridor import CorridorEnv  # (1)
+from env_corridor import TaskType
 from agt_tableQ import TableQAgt      # (2)
 from trainer import Trainer           # (3)
-from env_corridor import TaskType
 
 SAVE_DIR = 'agt_data'
 ENV_NAME = 'env_corridor'
@@ -61,7 +61,7 @@ elif process_type in ('anime', 'A'):
     IS_LEARN = False
     IS_SHOW_GRAPH = False
     IS_SHOW_ANIME = True
-    print('[q] 終了')    
+    print('[q] 終了')
 else:
     print('process type が間違っています。')
     sys.exit()
@@ -186,10 +186,10 @@ if (IS_LOAD_DATA is True) or \
 
     if IS_LEARN is True:  # (14)
         # 学習
-        # シミュレーション実行、ディクショナリ型は**でパラメータ指定        
+        # シミュレーション実行、ディクショナリ型は**でパラメータ指定
         trainer.simulate(**sim_prm)  # (15)
 
-        # エージェントの学習結果保存        
+        # エージェントの学習結果保存
         agt.save_weights()
 
         # 学習履歴保存
@@ -245,10 +245,7 @@ if IS_SHOW_GRAPH is True:
         plt.xlabel('steps')
         plt.grid(True)
 
-        plt.show()    
-    
+        plt.show()
+
     # 学習履歴表示
     show_graph(agt_prm['filepath'], **graph_prm)
-
-
-

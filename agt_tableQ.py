@@ -21,7 +21,7 @@ class TableQAgt():
         max_memory=500,     # int: 記憶する最大の観測数
         filepath=None,      # str: セーブ用のファイル名
         ):  # (1)
-        
+
         # クラス内の変数（アトリビュート）として保持 (2)
         self.n_action = n_action
         self.init_val_Q = init_val_Q

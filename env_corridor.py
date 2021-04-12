@@ -158,6 +158,9 @@ class CorridorEnv():
         return observation
 
     def render(self):
+        """
+        画像出力を作成する
+        """
         # 画像サイズ
         unit = self.unit
         width = unit * self.field_length
@@ -193,14 +196,14 @@ class CorridorEnv():
         if self.agt_state == 'fail':
             img_robot[idx] = col_good
         elif self.agt_state == 'goal':
-             img_robot[idx] = col_bad
+            img_robot[idx] = col_bad
 
         # ロボット画像の貼り付け
         unit = self.unit
         x0 = np.array(self.agt_pos) * unit
         img = self._copy_img(img, img_robot, x0, 0, isTrans=True)
 
-        return img        
+        return img
 
     def _copy_img(self, img, img_obj, x, y, isTrans=False):
         """
@@ -216,12 +219,12 @@ class CorridorEnv():
             img 上でのり付ける座標
         isTrans: bool
             True: 白を透明にする
-        
+
         Returns
         -------
         img: 3d numpy.ndarray
             コピー後の画像
-        
+
         """
         img_out = img.copy()
         h, w = img_obj.shape[:2]
@@ -232,7 +235,7 @@ class CorridorEnv():
             img_back = img[y:y1, x:x1, :].copy()
             img_obj[idx] = img_back[idx]
         img_out[y:y1, x:x1, :] = img_obj
-        
+
         return img_out
 
 
