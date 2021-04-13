@@ -295,7 +295,7 @@ if __name__ == '__main__':
     while True:
         image = env.render()
         cv2.imshow('env', image)
-        key = cv2.waitKey(10)
+        key = cv2.waitKey(0)
         if key == ord('q'):
             break
         if key in [ord('d'), ord(' ')]:
