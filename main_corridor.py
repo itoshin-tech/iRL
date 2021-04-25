@@ -9,9 +9,9 @@ import matplotlib.pyplot as plt
 
 # 自作モジュール
 from env_corridor import CorridorEnv  # (1)
-from env_corridor import TaskType
 from agt_tableQ import TableQAgt      # (2)
 from trainer import Trainer           # (3)
+from env_corridor import TaskType
 
 SAVE_DIR = 'agt_data'
 ENV_NAME = 'env_corridor'
