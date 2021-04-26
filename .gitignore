@@ -4,3 +4,6 @@ test*.py
 /agt_backup/*
 /image_bak
 *.pyc
+/image/*
+.pylintrc
+.gitignore
