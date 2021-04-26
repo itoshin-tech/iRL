@@ -6,7 +6,7 @@
 以下のコマンドで、タスクを自分でプレイすることができます。
 short_roadの代わりに、long_roadを指定することもできます。
 ```
-> python env_corridr.py short_road
+> python env_corridor.py short_road
 ```
 
 操作方法が表示されますので、これに従ってプレイしてください。
@@ -24,7 +24,7 @@ short_roadの代わりに、long_roadを指定することもできます。
 このタスクを強化学習にさせるには、以下のコマンドを実行します。
 
 ```
-> python sim_corridr.py 
+> python main_corridor.py 
 ```
 
 で以下のように使い方が表示されます。
