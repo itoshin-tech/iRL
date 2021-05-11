@@ -8,9 +8,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # 自作モジュール
-from env_corridor import CorridorEnv  # (1)
-from agt_tableQ import TableQAgt      # (2)
-from trainer import Trainer           # (3)
+from env_corridor import CorridorEnv
+from agt_tableQ import TableQAgt
+from trainer import Trainer
 from env_corridor import TaskType
 
 SAVE_DIR = 'agt_data'
@@ -20,7 +20,7 @@ argvs = sys.argv
 if len(argvs) < 3:
     MSG = '\n' + \
         '---- 使い方 ---------------------------------------\n' + \
-        '2つのパラメータを指定して実行します\n\n' + \
+        '2つのコマンドライン引数を指定して実行します\n\n' + \
         '> python main_corridor.py [task_type] [process_type]\n\n' + \
         '[task_type]\t: %s\n' % ', '.join([t.name for t in TaskType]) + \
         '[process_type]\t:learn/L, more/M, graph/G, anime/A\n' + \
@@ -29,7 +29,7 @@ if len(argvs) < 3:
     print(MSG)
     sys.exit()
 
-# 入力パラメータの確認 //////////
+# コマンドラインに入力された引数の確認 //////////
 task_type = TaskType.Enum_of(argvs[1])
 if task_type is None:
     MSG = '\n' + \
@@ -72,16 +72,16 @@ if not os.path.exists(SAVE_DIR):
 
 # 環境 インスタンス生成 //////////
 # 学習用環境
-env = CorridorEnv()             # (4)
-env.set_task_type(task_type)    # (5)
-obs = env.reset()               # (6)
+env = CorridorEnv()
+env.set_task_type(task_type)
+obs = env.reset()
 
 # 評価用環境
 eval_env = CorridorEnv()
 eval_env.set_task_type(task_type)
 
 # TableQAgt パラメータ //////////
-agt_prm = {                     # (7)
+agt_prm = {
     'n_action': env.n_action,
     'init_val_Q': 0,    # Qの初期値
     'alpha': 0.1,       # 学習率
@@ -91,7 +91,7 @@ agt_prm = {                     # (7)
 }
 
 # Trainer シミュレーション共通パラメータ //////////
-sim_prm = {                     # (8)
+sim_prm = {
     'n_episode': -1,        # エピソード数（-1は終了条件にしない）
     'is_eval': True,        # 評価を行うか
     'is_learn': True,       # 学習を行うか
@@ -116,14 +116,14 @@ ANIME_EPSILON = 0.0         # アニメーション時の乱雑度
 graph_prm = {}
 
 # task_type 別のパラメータ //////////
-if task_type == TaskType.short_road: #  (9)
-    sim_prm['n_step'] = 5000        # ステップ数
-    sim_prm['eval_interval'] = 100  # 評価を何ステップ毎にするか
-    agt_prm['epsilon'] = 0.4        # 乱雑度
-    agt_prm['gamma'] = 1.0          # 割引率
+if task_type == TaskType.short_road:
+    sim_prm['n_step'] = 5000         # ステップ数
+    sim_prm['eval_interval'] = 100   # 評価を何ステップごとにするか
+    agt_prm['epsilon'] = 0.4         # 乱雑度
+    agt_prm['gamma'] = 1.0           # 割引率
     graph_prm['target_reward'] = 2.5 # 報酬の目標値
-    graph_prm['target_step'] = 3.5  # ステップ数の目標値
-    obss = [                        # Q値チェック用の観測
+    graph_prm['target_step'] = 3.5   # ステップ数の目標値
+    obss = [                         # Q値チェック用の観測
         [
             [1, 0, 2, 0],
             [0, 1, 2, 0],
@@ -139,7 +139,7 @@ if task_type == TaskType.short_road: #  (9)
     ]
     sim_prm['obss'] = obss
 
-elif task_type == TaskType.long_road:  # (10)
+elif task_type == TaskType.long_road:
     sim_prm['n_step'] = 10000
     sim_prm['eval_interval'] = 500
     agt_prm['epsilon'] = 0.4
@@ -166,13 +166,13 @@ elif task_type == TaskType.long_road:  # (10)
 # メイン //////////
 if (IS_LOAD_DATA is True) or \
     (IS_LEARN is True) or \
-    (sim_prm['is_animation'] is True):  # (11)
+    (sim_prm['is_animation'] is True):
 
-    # Agtのインスタンス生成、ディクショナリ型でパラメータを渡すときには **　を付ける
-    agt = TableQAgt(**agt_prm)  # (12)
+    # Agtのインスタンス生成、ディクショナリ型でパラメータを渡すときには ** を付ける
+    agt = TableQAgt(**agt_prm)
 
     # Trainerのインスタンス生成
-    trainer = Trainer(agt, env, eval_env)  # (13)
+    trainer = Trainer(agt, env, eval_env)
 
     if IS_LOAD_DATA is True:
         # エージェントのデータロード
@@ -184,10 +184,10 @@ if (IS_LOAD_DATA is True) or \
             print('エージェントのパラメータがロードできません')
             sys.exit()
 
-    if IS_LEARN is True:  # (14)
+    if IS_LEARN is True:
         # 学習
         # シミュレーション実行、ディクショナリ型は**でパラメータ指定
-        trainer.simulate(**sim_prm)  # (15)
+        trainer.simulate(**sim_prm)
 
         # エージェントの学習結果保存
         agt.save_weights()
@@ -208,6 +208,8 @@ if IS_SHOW_GRAPH is True:
 
         Parameters
         ----------
+        pathname: str
+            データファイルのパス（拡張子は含めない）
         target_reward: float or None
             rewardの目標値に線を引く
         target_step: float or None

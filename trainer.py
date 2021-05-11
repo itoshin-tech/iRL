@@ -1,6 +1,6 @@
 """
 trainer.py
-環境とエージェントを組み合わせて動かす
+環境とエージェントをシミュレーションする
 """
 import time
 import cv2
@@ -16,9 +16,9 @@ class Trainer:
         agt=None,       # TableQTableQAgt class: エージェント
         env=None,       # CorridorEnv class: 環境
         eval_env=None,  # CorridorEnv class: 評価用環境
-        ):  # (1)
+        ):
         # TableQTableQAgt, CorridorCorridorEnvのインスタンスを
-        # クラス内の変数（アトリビュート）として保持 (2)
+        # クラス内の変数（アトリビュート）として保持
         self.agt = agt
         self.env = env
         self.eval_env = eval_env
@@ -38,14 +38,14 @@ class Trainer:
 
     def simulate(
         self,
-        n_step=1000,        # int: ステップ数(-1は終了条件にしない)
-        n_episode=-1,       # int: エピソード数(-1は終了条件にしない)
+        n_step=1000,        # int: ステップ数（-1は終了条件にしない）
+        n_episode=-1,       # int: エピソード数（-1は終了条件にしない）
         is_eval=True,       # bool: 評価を行うか
         is_learn=True,      # bool: 学習を行うか
         is_animation=False, # bool: アニメーションの表示をするか
-        eval_interval=100,  # int: 評価を何ステップ毎にするか
-        eval_n_step=-1,     # int: 評価のステップ数(-1は終了条件にしない)
-        eval_n_episode=-1,  # int: 評価のエピソード数(-1は終了条件にしない)
+        eval_interval=100,  # int: 評価を何ステップごとにするか
+        eval_n_step=-1,     # int: 評価のステップ数（-1は終了条件にしない）
+        eval_n_episode=-1,  # int: 評価のエピソード数（-1は終了条件にしない）
         eval_epsilon=0.0,   # float: 乱雑度
         anime_delay=0.5,    # float: アニメーションのフレーム間の秒数
         obss=None,          # list: Q値チェック用の観測
@@ -60,33 +60,33 @@ class Trainer:
         # 開始時間の記録
         stime = time.time()
 
-        # 環境クラスと変数を初期化 (1)
+        # 環境クラスと変数を初期化
         obs = self.env.reset()
         timestep = 0  # ステップのカウント
         episode = 0  # エピソードのカウント
         done = False
         self.on_simulation = True
 
-        # シミュレーションのループ開始 (2)
+        # シミュレーションのループ開始
         while self.on_simulation:
             if done is False:
-                # agtが行動を選ぶ (3)
+                # agtが行動を選ぶ
                 act = self.agt.select_action(obs)
 
-                # envが次の観測と報酬を決める  (4)
+                # envが次の観測と報酬を決める
                 next_obs, rwd, next_done = self.env.step(act)
 
-                # agtが学習する (5)
+                # agtが学習する
                 if is_learn is True:
                     self.agt.learn(obs, act, rwd, next_obs, next_done)
 
             else:
-                # 最終状態になったら、envを初期化する (6)
+                # 最終状態になったら、envを初期化する
                 next_obs = self.env.reset()
                 rwd = None
                 next_done = False
 
-            # next_obs, next_done を次の学習のために保持 (7)
+            # next_obs, next_doneを次の学習のために保持
             obs = next_obs
             done = next_done
 
@@ -130,7 +130,7 @@ class Trainer:
                             )
 
             # 指定したstepがn_stepに達するか、
-            # episode数がn_episodeに達したら終了 (8)
+            # episode数がn_episodeに達したら終了
             if n_step > 0:
                 if timestep >= n_step:
                     break

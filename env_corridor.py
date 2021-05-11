@@ -1,6 +1,6 @@
 """
 env_corridor.py
-廊下の環境
+環境　コリドータスク
 """
 import sys
 from enum import Enum, auto
@@ -10,7 +10,7 @@ import cv2
 
 PATH_ROBOT = 'rsc/robo_right.png'
 PATH_CRYSTAL = 'rsc/crystal_small.png'
-PATH_BRANK = 'rsc/brank.png'
+PATH_BLANK = 'rsc/blank.png'
 
 
 class TaskType(Enum):
@@ -33,10 +33,10 @@ class TaskType(Enum):
 
 class CorridorEnv():
     """
-    フィールドが1次元のシンプルな迷路
+    環境　コリドータスク    
     """
     # 内部表現のID
-    ID_brank = 0
+    ID_blank = 0
     ID_agt = 1
     ID_goal = 2
 
@@ -45,8 +45,8 @@ class CorridorEnv():
             field_length=4,         # int: フィールドの長さ
             goal_candidate=(2, 3),  # tuple of int: ゴールの位置
             pos_start=0,            # スタート位置
-            reward_fail=-1,          # 失敗した時の報酬（ペナルティ）
-            reward_move=-1,          # 進んだ時の報酬（コスト）
+            reward_fail=-1,         # 失敗した時の報酬（ペナルティ）
+            reward_move=-1,         # 進んだときの報酬（コスト）
             reward_goal=5,          # クリスタルを得た時の報酬
         ):
         """
@@ -69,19 +69,19 @@ class CorridorEnv():
         self.agt_pos = None
         self.goal_pos = None
         self.is_first_step = None
-        self.agt_state = None # render 用
+        self.agt_state = None # render用
 
         # 画像のロード
         self.img_robot = cv2.imread(PATH_ROBOT)
         self.img_crystal = cv2.imread(PATH_CRYSTAL)
-        self.img_brank = cv2.imread(PATH_BRANK)
+        self.img_blank = cv2.imread(PATH_BLANK)
         self.unit = self.img_robot.shape[0]
 
     def set_task_type(self, task_type):
         """
         task_type を指定して、parameterを一括設定する
         """
-        if task_type == TaskType.short_road:  # (1)
+        if task_type == TaskType.short_road:
             self.field_length = 4           # 廊下の長さ
             self.goal_candidate = (2, 3)    # クリスタルの出る位置の候補
             self.pos_start = 0              # スタート地点
@@ -89,7 +89,7 @@ class CorridorEnv():
             self.reward_move = -1           # 「進む」の報酬（コスト）
             self.reward_goal = 5            # 「拾う」の成功時の報酬
 
-        elif task_type == TaskType.long_road:  # (2)
+        elif task_type == TaskType.long_road:
             self.field_length = 5
             self.goal_candidate = (1, 2, 3, 4)
             self.pos_start = 0
@@ -105,7 +105,7 @@ class CorridorEnv():
         """
         内部状態をリセットする
         """
-        self.agt_state = 'move' # render 用
+        self.agt_state = 'move' # render用
 
         self.agt_pos = self.pos_start
         idx = np.random.randint(len(self.goal_candidate))
@@ -144,15 +144,13 @@ class CorridorEnv():
 
         observation = self._make_observation()
 
-        # render 用
-
         return observation, reward, done
 
     def _make_observation(self):
         """
         現在の状態から、エージェントが受け取る入力情報を生成
         """
-        observation = np.ones(self.field_length, dtype=int) * CorridorEnv.ID_brank
+        observation = np.ones(self.field_length, dtype=int) * CorridorEnv.ID_blank
         observation[self.goal_pos] = CorridorEnv.ID_goal
         observation[self.agt_pos] = CorridorEnv.ID_agt
         return observation
@@ -171,7 +169,7 @@ class CorridorEnv():
 
         # ブロック各種の描画
         for i_x in range(self.field_length):
-            img = self._copy_img(img, self.img_brank, unit * i_x, 0)
+            img = self._copy_img(img, self.img_blank, unit * i_x, 0)
 
         # ゴールの描画
         if self.agt_state != 'goal':
@@ -216,7 +214,7 @@ class CorridorEnv():
         img_obj: 3d numpy.ndarray
             張り付ける画像
         x, y: int
-            img 上でのり付ける座標
+            img 上で張り付ける座標
         isTrans: bool
             True: 白を透明にする
 
